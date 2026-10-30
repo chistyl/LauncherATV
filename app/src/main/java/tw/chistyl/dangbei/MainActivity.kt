@@ -700,14 +700,17 @@ class MainActivity : Activity() {
 
     private fun renderFolders() {
         foldersContainer.removeAllViews()
-        val folderNames = folderMap().values.distinct().sorted()
+        // Read persisted folder assignments once per render instead of
+        // reparsing the same JSON for every folder tile.
+        val assignments = folderMap()
+        val folderNames = assignments.values.distinct().sorted()
         if (folderNames.isEmpty()) {
             foldersContainer.visibility = View.GONE
             return
         }
         foldersContainer.visibility = View.VISIBLE
         folderNames.forEach { name ->
-            val count = folderMap().values.count { it == name }
+            val count = assignments.values.count { it == name }
             val tile = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
