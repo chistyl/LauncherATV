@@ -1507,16 +1507,20 @@ class MainActivity : Activity() {
                 if (index >= 0 && index % 6 == 0 && page > 0) {
                     // Avoid skipping several pages when the user holds LEFT.
                     if ((event?.repeatCount ?: 0) > 0) return true
-                    val column = index % 6
                     val row = index / 6
-                    val previousPageCount = (desktopApps().size - page * pageSize)
-                        .coerceAtMost(pageSize)
+                    val desktop = desktopApps()
+                    val previousPage = page - 1
+                    // Count items on the destination page, not the current page.
+                    // The current page may be the short final page.
+                    val previousPageCount = (desktop.size - previousPage * pageSize)
+                        .coerceIn(0, pageSize)
                     val targetRow = if (row == 1 && previousPageCount > 6) 1 else 0
-                    val targetIndex = (targetRow * 6 + 5).coerceAtMost(previousPageCount - 1)
+                    val targetIndex = (targetRow * 6 + 5)
+                        .coerceAtMost(previousPageCount - 1)
                         .coerceAtLeast(0)
-                    page--
+                    page = previousPage
                     lastFocusedIndex = targetIndex
-                    lastFocusedPackage = desktopApps().getOrNull(page * pageSize + targetIndex)
+                    lastFocusedPackage = desktop.getOrNull(page * pageSize + targetIndex)
                         ?.activityInfo?.packageName
                     firstFocusOnRender = true
                     renderPage()
