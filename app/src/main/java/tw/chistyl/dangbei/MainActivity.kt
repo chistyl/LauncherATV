@@ -745,15 +745,54 @@ class MainActivity : Activity() {
                 }
             }
 
-            val artwork = ImageView(this).apply {
-                setImageDrawable(appIcon(info))
-                scaleType = ImageView.ScaleType.FIT_CENTER
-                background = appArtworkBackground(info)
-                contentDescription = appLabel(info)
+            val artworkDrawable = appIcon(info)
+            val artworkWidthPx = dp(artworkWidthDp)
+            val artworkHeightPx = dp(artworkHeightDp)
+            val artwork = if (hasTvBanner(info)) {
+                ImageView(this).apply {
+                    setImageDrawable(artworkDrawable)
+                    scaleType = ImageView.ScaleType.FIT_CENTER
+                    background = appArtworkBackground(info)
+                    contentDescription = appLabel(info)
+                }
+            } else {
+                // 沒有 TV Banner：先將原圖放大裁切作為柔焦延伸底圖，
+                // 再將未變形的原始圖示置中疊回，讓延伸色彩真正取自 APP 圖示。
+                FrameLayout(this).apply {
+                    background = appArtworkBackground(info)
+                    clipToOutline = true
+                    val backdrop = ImageView(this@MainActivity).apply {
+                        setImageDrawable(artworkDrawable.constantState
+                            ?.newDrawable(resources)?.mutate() ?: artworkDrawable)
+                        scaleType = ImageView.ScaleType.CENTER_CROP
+                        alpha = 0.88f
+                        if (android.os.Build.VERSION.SDK_INT >= 31) {
+                            setRenderEffect(
+                                android.graphics.RenderEffect.createBlurEffect(
+                                    dp(18f).toFloat(),
+                                    dp(18f).toFloat(),
+                                    android.graphics.Shader.TileMode.CLAMP
+                                )
+                            )
+                        }
+                        contentDescription = null
+                    }
+                    addView(backdrop, FrameLayout.LayoutParams(-1, -1))
+                    val foreground = ImageView(this@MainActivity).apply {
+                        setImageDrawable(artworkDrawable.constantState
+                            ?.newDrawable(resources)?.mutate() ?: artworkDrawable)
+                        scaleType = ImageView.ScaleType.FIT_CENTER
+                        setPadding(dp(12f), dp(8f), dp(12f), dp(8f))
+                        contentDescription = appLabel(info)
+                    }
+                    addView(foreground, FrameLayout.LayoutParams(-1, -1).apply {
+                        gravity = Gravity.CENTER
+                    })
+                }
             }
             cardIcon = artwork
             item.addView(artwork, LinearLayout.LayoutParams(
-                dp(artworkWidthDp), dp(artworkHeightDp)
+                artworkWidthPx, artworkHeightPx
             ))
 
             val label = TextView(this).apply {
