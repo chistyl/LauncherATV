@@ -139,14 +139,15 @@ class MainActivity : Activity() {
         val bg = ImageView(this).apply {
             setImageResource(R.drawable.bg_launcher_default_new)
             scaleType = ImageView.ScaleType.CENTER_CROP
-            contentDescription = "桌面背景"
+            contentDescription = "桌面壁紙"
         }
         root.addView(bg, FrameLayout.LayoutParams(-1, -1))
 
+        // Emotn UI keeps the wallpaper as the visual focus.
         val shade = View(this).apply {
             background = GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(0x44000000, 0x10000000, 0xAA000000.toInt())
+                intArrayOf(0x18000000, 0x00000000, 0x99000000.toInt())
             )
         }
         root.addView(shade, FrameLayout.LayoutParams(-1, -1))
@@ -155,138 +156,108 @@ class MainActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             clipChildren = false
             clipToPadding = false
-            setPadding(dp(54f), dp(30f), dp(54f), dp(22f))
+            setPadding(dp(58f), dp(34f), dp(58f), dp(42f))
         }
 
         val header = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
-        val brandIcon = ImageView(this).apply {
-            setImageResource(R.drawable.logo)
-            scaleType = ImageView.ScaleType.FIT_CENTER
-            contentDescription = "當貝桌面"
+        val status = TextView(this).apply {
+            text = "●"
+            textSize = 15f
+            setTextColor(0xFFEAF4FF.toInt())
+            setShadowLayer(5f, 0f, 1f, Color.BLACK)
         }
-        header.addView(brandIcon, LinearLayout.LayoutParams(dp(42f), dp(42f)).apply {
-            rightMargin = dp(12f)
+        header.addView(status, LinearLayout.LayoutParams(-2, -2).apply {
+            rightMargin = dp(10f)
         })
-        val brand = TextView(this).apply {
-            text = "當貝桌面"
-            textSize = 25f
-            setTextColor(Color.WHITE)
-            setTypeface(null, android.graphics.Typeface.BOLD)
-            setShadowLayer(8f, 0f, 2f, Color.BLACK)
-        }
-        header.addView(brand, LinearLayout.LayoutParams(0, -2, 1f))
-
-        dateLabel = TextView(this).apply {
-            text = ""
-            textSize = 16f
-            setTextColor(0xFFE8E8E8.toInt())
-            setShadowLayer(5f, 0f, 1f, Color.BLACK)
-        }
-        header.addView(dateLabel)
         networkLabel = TextView(this).apply {
-            text = "檢查網路中"
+            text = "網路連線中"
             textSize = 14f
-            setTextColor(0xFFE8E8E8.toInt())
+            setTextColor(0xFFF2F5F8.toInt())
             setShadowLayer(5f, 0f, 1f, Color.BLACK)
-            setPadding(dp(22f), 0, 0, 0)
             contentDescription = "網路連線狀態"
         }
-        header.addView(networkLabel)
-        content.addView(header)
+        header.addView(networkLabel, LinearLayout.LayoutParams(0, -2, 1f))
 
-        val sectionRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, dp(26f), 0, dp(12f))
-        }
-        val section = TextView(this).apply {
-            text = "我的應用"
-            textSize = 22f
-            setTypeface(null, android.graphics.Typeface.BOLD)
-            setTextColor(Color.WHITE)
-        }
-        sectionRow.addView(section, LinearLayout.LayoutParams(0, -2, 1f))
-        pageLabel = TextView(this).apply {
-            textSize = 13f
-            setTextColor(0xFFD9E6F7.toInt())
-        }
-        sectionRow.addView(pageLabel)
-        content.addView(sectionRow)
-
-        grid = GridLayout(this).apply {
-            columnCount = 6
-            rowCount = 2
-            useDefaultMargins = false
-            alignmentMode = GridLayout.ALIGN_BOUNDS
-            // Focused tiles scale beyond their measured bounds; keep the glow
-            // visible at the first/last columns and the top/bottom rows.
-            clipChildren = false
-            clipToPadding = false
-            setPadding(0, 0, 0, 0)
-        }
-        content.addView(grid, LinearLayout.LayoutParams(-1, 0, 1f))
-
-        foldersContainer = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            // Folder focus animation also grows beyond the normal tile bounds.
-            clipChildren = false
-            clipToPadding = false
-            setPadding(0, dp(4f), 0, dp(4f))
-        }
-        // Allow the folder row to scroll horizontally when users create
-        // more folders than can fit across the TV screen.
-        val foldersScroll = android.widget.HorizontalScrollView(this).apply {
-            isHorizontalScrollBarEnabled = false
-            isFillViewport = true
-            clipChildren = false
-            clipToPadding = false
-            descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
-        }
-        foldersScroll.addView(
-            foldersContainer,
-            ViewGroup.LayoutParams(-2, -1)
-        )
-        content.addView(foldersScroll, LinearLayout.LayoutParams(-1, dp(78f)))
-
-        val footer = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            clipChildren = false
-            clipToPadding = false
-            setPadding(0, dp(10f), 0, 0)
-        }
-        val hint = TextView(this).apply {
-            text = "方向鍵瀏覽　OK 開啟　長按管理 APP"
-            textSize = 12f
-            setTextColor(0xCCFFFFFF.toInt())
-        }
-        footer.addView(hint, LinearLayout.LayoutParams(0, -2, 1f))
         desktopSettingsButton = TextView(this).apply {
             id = View.generateViewId()
-            text = "桌面選項"
-            textSize = 14f
-            setTextColor(Color.WHITE)
+            text = "⚙"
+            textSize = 25f
             gravity = Gravity.CENTER
+            setTextColor(Color.WHITE)
             isFocusable = true
             isFocusableInTouchMode = true
-            setPadding(dp(18f), dp(10f), dp(18f), dp(10f))
+            setPadding(dp(14f), dp(8f), dp(14f), dp(8f))
             background = focusBackground(false)
+            contentDescription = "桌面設定"
             setOnFocusChangeListener { v, focused -> v.background = focusBackground(focused) }
             setOnClickListener { showDesktopOptions() }
         }
-        footer.addView(desktopSettingsButton)
-        content.addView(footer)
+        header.addView(desktopSettingsButton, LinearLayout.LayoutParams(dp(54f), dp(48f)).apply {
+            rightMargin = dp(22f)
+        })
 
+        dateLabel = TextView(this).apply {
+            text = ""
+            textSize = 22f
+            setTextColor(Color.WHITE)
+            setShadowLayer(6f, 0f, 2f, Color.BLACK)
+        }
+        header.addView(dateLabel)
+        content.addView(header)
+
+        val spacer = View(this)
+        content.addView(spacer, LinearLayout.LayoutParams(1, 0, 1f))
+
+        val appSection = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            clipChildren = false
+            clipToPadding = false
+        }
+        val appHeading = TextView(this).apply {
+            text = "My apps"
+            textSize = 17f
+            setTextColor(0xFFF5F7FA.toInt())
+            setShadowLayer(4f, 0f, 1f, Color.BLACK)
+            setPadding(dp(4f), 0, 0, dp(12f))
+        }
+        appSection.addView(appHeading)
+
+        grid = GridLayout(this).apply {
+            columnCount = pageSize
+            rowCount = 1
+            useDefaultMargins = false
+            alignmentMode = GridLayout.ALIGN_BOUNDS
+            clipChildren = false
+            clipToPadding = false
+            setPadding(dp(4f), dp(8f), dp(4f), dp(12f))
+        }
+        val appScroll = android.widget.HorizontalScrollView(this).apply {
+            isHorizontalScrollBarEnabled = false
+            isFillViewport = false
+            clipChildren = false
+            clipToPadding = false
+            descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
+            overScrollMode = View.OVER_SCROLL_NEVER
+        }
+        appScroll.addView(grid, ViewGroup.LayoutParams(-2, -2))
+        appSection.addView(appScroll, LinearLayout.LayoutParams(-1, dp(174f)))
+        content.addView(appSection)
+
+        // Preserve folder data and management functions without showing a folder row.
+        foldersContainer = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            visibility = View.GONE
+        }
+        pageLabel = TextView(this).apply { visibility = View.GONE }
         root.addView(content, FrameLayout.LayoutParams(-1, -1))
         setContentView(root)
     }
 
     private fun updateClock() {
-        dateLabel.text = SimpleDateFormat("yyyy/MM/dd  E  HH:mm", Locale.TAIWAN).format(Date())
+        dateLabel.text = SimpleDateFormat("HH:mm", Locale.TAIWAN).format(Date())
     }
 
     private fun updateNetworkStatus() {
