@@ -266,6 +266,7 @@ class MainActivity : Activity() {
         }
         footer.addView(hint, LinearLayout.LayoutParams(0, -2, 1f))
         desktopSettingsButton = TextView(this).apply {
+            id = View.generateViewId()
             text = "桌面選項"
             textSize = 14f
             setTextColor(Color.WHITE)
@@ -853,6 +854,21 @@ class MainActivity : Activity() {
             tile.nextFocusRightId = if (index < folderTiles.lastIndex) {
                 folderTiles[index + 1].id
             } else tile.id
+
+            // UP returns to the desktop app grid in the corresponding
+            // horizontal area; DOWN follows the existing route to settings.
+            if (grid.childCount > 0) {
+                val preferredColumn = (index * 2).coerceIn(0, 5)
+                val appIndex = (grid.childCount - 1 downTo 0).firstOrNull {
+                    it % 6 == preferredColumn
+                } ?: (grid.childCount - 1)
+                tile.nextFocusUpId = grid.getChildAt(appIndex).id
+            } else if (::desktopSettingsButton.isInitialized) {
+                tile.nextFocusUpId = desktopSettingsButton.id
+            }
+            if (::desktopSettingsButton.isInitialized) {
+                tile.nextFocusDownId = desktopSettingsButton.id
+            }
         }
     }
 
