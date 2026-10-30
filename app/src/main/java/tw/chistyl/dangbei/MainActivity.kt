@@ -569,8 +569,11 @@ class MainActivity : Activity() {
         val density = resources.displayMetrics.density
         val screenWidthDp = resources.displayMetrics.widthPixels / density
         val columnWidthDp = ((screenWidthDp - 108f) / 6f).coerceAtLeast(120f)
-        val cardHeightDp = (columnWidthDp * 0.78f).coerceIn(164f, 224f)
-        val iconWidthDp = (columnWidthDp * 0.58f).coerceIn(96f, 136f)
+        // Dangbei's supplied app tile artwork is landscape (360:224).
+        // Keep each app card close to that proportion instead of stretching
+        // it into a tall portrait tile on common TV resolutions.
+        val cardHeightDp = (columnWidthDp * 0.66f).coerceIn(104f, 160f)
+        val iconWidthDp = (columnWidthDp * 0.82f).coerceIn(104f, 160f)
         val iconHeightDp = iconWidthDp * 224f / 360f
         val cardMarginDp = (columnWidthDp * 0.025f).coerceIn(4f, 9f)
         visible.forEachIndexed { index, info ->
