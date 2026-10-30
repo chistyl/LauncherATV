@@ -553,6 +553,80 @@ class MainActivity : Activity() {
         return drawable
     }
 
+    private fun hasTvBanner(info: android.content.pm.ResolveInfo): Boolean {
+        val pm = packageManager
+        val component = android.content.ComponentName(
+            info.activityInfo.packageName, info.activityInfo.name
+        )
+        return try {
+            pm.getActivityBanner(component) != null ||
+                pm.getApplicationBanner(info.activityInfo.packageName) != null
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /**
+     * For apps without a TV banner, sample the original icon and extend its
+     * own dominant color into the landscape artwork area. The icon itself
+     * remains FIT_CENTER and is never stretched or cropped.
+     */
+    private fun appArtworkBackground(info: android.content.pm.ResolveInfo): Drawable {
+        if (hasTvBanner(info)) {
+            return GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(0x33232B35, 0x55202020)
+            ).apply {
+                cornerRadius = dp(8f).toFloat()
+                setStroke(dp(1f), 0x22FFFFFF)
+            }
+        }
+
+        val icon = try { info.loadIcon(packageManager) } catch (_: Exception) { appIcon(info) }
+        val sample = android.graphics.Bitmap.createBitmap(12, 12, android.graphics.Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(sample)
+        val oldBounds = android.graphics.Rect(icon.bounds)
+        icon.setBounds(0, 0, 12, 12)
+        icon.draw(canvas)
+        icon.bounds = oldBounds
+
+        var red = 0L
+        var green = 0L
+        var blueChannel = 0L
+        var count = 0L
+        for (y in 0 until 12) for (x in 0 until 12) {
+            val color = sample.getPixel(x, y)
+            if (android.graphics.Color.alpha(color) > 24) {
+                red += android.graphics.Color.red(color)
+                green += android.graphics.Color.green(color)
+                blueChannel += android.graphics.Color.blue(color)
+                count++
+            }
+        }
+        sample.recycle()
+        val divisor = count.coerceAtLeast(1L)
+        val base = android.graphics.Color.rgb(
+            (red / divisor).toInt(),
+            (green / divisor).toInt(),
+            (blueChannel / divisor).toInt()
+        )
+        val hsv = FloatArray(3)
+        android.graphics.Color.colorToHSV(base, hsv)
+        hsv[1] = (hsv[1] * 0.72f).coerceIn(0.22f, 0.78f)
+        hsv[2] = (hsv[2] * 0.72f).coerceIn(0.20f, 0.62f)
+        val rich = android.graphics.Color.HSVToColor(hsv)
+        val darker = android.graphics.Color.HSVToColor(
+            floatArrayOf(hsv[0], hsv[1], (hsv[2] * 0.58f).coerceIn(0.12f, 0.42f))
+        )
+        return GradientDrawable(
+            GradientDrawable.Orientation.TL_BR,
+            intArrayOf(rich, base, darker)
+        ).apply {
+            cornerRadius = dp(8f).toFloat()
+            setStroke(dp(1f), 0x44FFFFFF)
+        }
+    }
+
     private fun renderPage() {
         grid.removeAllViews()
         val desktopList = desktopApps()
@@ -641,14 +715,7 @@ class MainActivity : Activity() {
             val artwork = ImageView(this).apply {
                 setImageDrawable(appIcon(info))
                 scaleType = ImageView.ScaleType.FIT_CENTER
-                background = GradientDrawable(
-                    GradientDrawable.Orientation.TOP_BOTTOM,
-                    intArrayOf(0x33232B35, 0x55202020)
-                ).apply {
-                    shape = GradientDrawable.RECTANGLE
-                    cornerRadius = dp(8f).toFloat()
-                    setStroke(dp(1f), 0x22FFFFFF)
-                }
+                background = appArtworkBackground(info)
                 contentDescription = appLabel(info)
             }
             cardIcon = artwork
