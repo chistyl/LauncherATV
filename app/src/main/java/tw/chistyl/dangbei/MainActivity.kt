@@ -681,6 +681,13 @@ class MainActivity : Activity() {
                     if (focused) {
                         lastFocusedPackage = info.activityInfo.packageName
                         lastFocusedIndex = index
+                        // Keep the focused TV tile fully visible while the
+                        // horizontal shelf scrolls, including at screen edges.
+                        v.post {
+                            v.requestRectangleOnScreen(
+                                android.graphics.Rect(0, 0, v.width, v.height), true
+                            )
+                        }
                         persistDesktopPosition()
                     }
                 }
