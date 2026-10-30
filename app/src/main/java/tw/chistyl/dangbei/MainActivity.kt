@@ -570,11 +570,11 @@ class MainActivity : Activity() {
         val screenWidthDp = resources.displayMetrics.widthPixels / density
         val columnWidthDp = ((screenWidthDp - 108f) / 6f).coerceAtLeast(120f)
         // Dangbei's supplied app tile artwork is landscape (360:224).
-        // Keep each app card close to that proportion instead of stretching
-        // it into a tall portrait tile on common TV resolutions.
-        val cardHeightDp = (columnWidthDp * 0.66f).coerceIn(104f, 160f)
+        // Size the card from the actual icon height plus vertical padding and
+        // the one-line app label, so 1080p/720p layouts do not crop the label.
         val iconWidthDp = (columnWidthDp * 0.82f).coerceIn(104f, 160f)
         val iconHeightDp = iconWidthDp * 224f / 360f
+        val cardHeightDp = (iconHeightDp + 52f).coerceIn(116f, 176f)
         val cardMarginDp = (columnWidthDp * 0.025f).coerceIn(4f, 9f)
         visible.forEachIndexed { index, info ->
             val pm = packageManager
