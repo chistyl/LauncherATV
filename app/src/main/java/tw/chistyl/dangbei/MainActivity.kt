@@ -595,6 +595,7 @@ class MainActivity : Activity() {
             var cardIcon: ImageView? = null
             var cardLabel: TextView? = null
             val item = LinearLayout(this).apply {
+                id = View.generateViewId()
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER
                 isFocusable = true
@@ -712,6 +713,22 @@ class MainActivity : Activity() {
                 setMargins(margin, margin, margin, margin)
             }
             grid.addView(item, lp)
+        }
+
+        // Use explicit in-page focus links so scaling animations never make
+        // Android TV's spatial focus search choose an unexpected neighbour.
+        for (index in 0 until grid.childCount) {
+            val column = index % 6
+            val row = index / 6
+            val item = grid.getChildAt(index)
+            if (column > 0) item.nextFocusLeftId = grid.getChildAt(index - 1).id
+            if (column < 5 && index + 1 < grid.childCount) {
+                item.nextFocusRightId = grid.getChildAt(index + 1).id
+            }
+            val above = index - 6
+            val below = index + 6
+            if (row > 0 && above >= 0) item.nextFocusUpId = grid.getChildAt(above).id
+            if (below < grid.childCount) item.nextFocusDownId = grid.getChildAt(below).id
         }
 
         val pages = ((desktopList.size - 1).coerceAtLeast(0)) / pageSize + 1
