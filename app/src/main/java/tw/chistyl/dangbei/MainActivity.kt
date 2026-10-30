@@ -1019,7 +1019,8 @@ class MainActivity : Activity() {
             item.addView(actions, LinearLayout.LayoutParams(dp(42f), dp(34f)))
             val lp = GridLayout.LayoutParams().apply {
                 width = 0
-                height = dp(112f)
+                // Reserve room for icon, label, and the focusable more-actions control.
+                height = dp(148f)
                 columnSpec = GridLayout.spec(index % 4, 1f)
                 rowSpec = GridLayout.spec(index / 4)
                 val gap = dp(6f)
