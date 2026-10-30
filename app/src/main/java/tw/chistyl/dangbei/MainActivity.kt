@@ -986,6 +986,12 @@ class MainActivity : Activity() {
                         prefs.edit().putString(
                             "folder_focus_$name", info.activityInfo.packageName
                         ).apply()
+                        // Explicitly reveal the focused tile in large folders.
+                        v.post {
+                            v.requestRectangleOnScreen(
+                                android.graphics.Rect(0, 0, v.width, v.height), true
+                            )
+                        }
                     }
                     v.background = getDrawable(
                         if (focused) R.drawable.focus_app_list_item else R.drawable.bg_app_list_item
@@ -1047,6 +1053,11 @@ class MainActivity : Activity() {
                         prefs.edit().putString(
                             "folder_focus_$name", info.activityInfo.packageName
                         ).apply()
+                        item.post {
+                            item.requestRectangleOnScreen(
+                                android.graphics.Rect(0, 0, item.width, item.height), true
+                            )
+                        }
                     }
                 }
                 setOnClickListener {
@@ -1159,7 +1170,7 @@ class MainActivity : Activity() {
             clipToPadding = false
             descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
         }
-        appScroll.addView(appGrid, android.widget.ScrollView.LayoutParams(-1, -2))
+        appScroll.addView(appGrid, ViewGroup.LayoutParams(-1, -2))
         val folderRows = (members.size + 3) / 4
         val desiredGridHeight = dp(20f + folderRows * 148f + 4f)
         val maxGridHeight = (resources.displayMetrics.heightPixels * 0.55f).toInt()
