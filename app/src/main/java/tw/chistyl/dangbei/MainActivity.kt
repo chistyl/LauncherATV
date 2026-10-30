@@ -557,7 +557,8 @@ class MainActivity : Activity() {
                 isFocusable = true
                 isFocusableInTouchMode = true
                 background = getDrawable(R.drawable.bg_app_list_item)
-                setPadding(10, 10, 10, 10)
+                val cardPadding = (10f * density).toInt()
+                setPadding(cardPadding, cardPadding, cardPadding, cardPadding)
                 clipToPadding = false
                 setTag(info.activityInfo.packageName)
                 setOnFocusChangeListener { v, focused ->
@@ -626,7 +627,8 @@ class MainActivity : Activity() {
                 setImageDrawable(appIcon(info))
                 scaleType = ImageView.ScaleType.FIT_CENTER
                 background = getDrawable(R.drawable.pic_icon_bg)
-                setPadding(12, 12, 12, 12)
+                val iconPadding = (12f * density).toInt()
+                setPadding(iconPadding, iconPadding, iconPadding, iconPadding)
                 contentDescription = appLabel(info)
             }
             // The extracted original pic_icon_bg asset is a wide 360:224 tile.
@@ -643,7 +645,7 @@ class MainActivity : Activity() {
                 maxLines = 1
                 ellipsize = android.text.TextUtils.TruncateAt.END
                 setTextColor(Color.WHITE)
-                setPadding(0, 7, 0, 0)
+                setPadding(0, (7f * density).toInt(), 0, 0)
             }
             item.addView(label, LinearLayout.LayoutParams(-1, -2))
 
