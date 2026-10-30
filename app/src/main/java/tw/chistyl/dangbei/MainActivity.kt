@@ -120,6 +120,9 @@ class MainActivity : Activity() {
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
     }
 
+    private fun dp(value: Float): Int =
+        (value * resources.displayMetrics.density + 0.5f).toInt()
+
     private fun buildHome() {
         val root = FrameLayout(this)
         val bg = ImageView(this).apply {
@@ -139,7 +142,7 @@ class MainActivity : Activity() {
 
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(54, 30, 54, 22)
+            setPadding(dp(54f), dp(30f), dp(54f), dp(22f))
         }
 
         val header = LinearLayout(this).apply {
@@ -151,8 +154,8 @@ class MainActivity : Activity() {
             scaleType = ImageView.ScaleType.FIT_CENTER
             contentDescription = "當貝桌面"
         }
-        header.addView(brandIcon, LinearLayout.LayoutParams(42, 42).apply {
-            rightMargin = 12
+        header.addView(brandIcon, LinearLayout.LayoutParams(dp(42f), dp(42f)).apply {
+            rightMargin = dp(12f)
         })
         val brand = TextView(this).apply {
             text = "當貝桌面"
@@ -175,7 +178,7 @@ class MainActivity : Activity() {
             textSize = 14f
             setTextColor(0xFFE8E8E8.toInt())
             setShadowLayer(5f, 0f, 1f, Color.BLACK)
-            setPadding(22, 0, 0, 0)
+            setPadding(dp(22f), 0, 0, 0)
             contentDescription = "網路連線狀態"
         }
         header.addView(networkLabel)
@@ -184,7 +187,7 @@ class MainActivity : Activity() {
         val sectionRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, 26, 0, 12)
+            setPadding(0, dp(26f), 0, dp(12f))
         }
         val section = TextView(this).apply {
             text = "我的應用"
@@ -214,12 +217,12 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER_VERTICAL
             setPadding(0, 4, 0, 4)
         }
-        content.addView(foldersContainer, LinearLayout.LayoutParams(-1, 78))
+        content.addView(foldersContainer, LinearLayout.LayoutParams(-1, dp(78f)))
 
         val footer = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, 10, 0, 0)
+            setPadding(0, dp(10f), 0, 0)
         }
         val hint = TextView(this).apply {
             text = "方向鍵瀏覽　OK 開啟　長按管理 APP"
@@ -234,7 +237,7 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER
             isFocusable = true
             isFocusableInTouchMode = true
-            setPadding(18, 10, 18, 10)
+            setPadding(dp(18f), dp(10f), dp(18f), dp(10f))
             background = focusBackground(false)
             setOnFocusChangeListener { v, focused -> v.background = focusBackground(focused) }
             setOnClickListener { showDesktopOptions() }
