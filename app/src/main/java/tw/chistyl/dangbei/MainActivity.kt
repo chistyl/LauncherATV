@@ -592,6 +592,8 @@ class MainActivity : Activity() {
         val cardMarginDp = (columnWidthDp * 0.025f).coerceIn(4f, 9f)
         visible.forEachIndexed { index, info ->
             val pm = packageManager
+            var cardIcon: ImageView? = null
+            var cardLabel: TextView? = null
             val item = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER
@@ -610,6 +612,14 @@ class MainActivity : Activity() {
                     v.animate().scaleX(if (focused) 1.055f else 1f)
                         .scaleY(if (focused) 1.055f else 1f).setDuration(150).start()
                     v.elevation = if (focused) 12f else 0f
+                    // Keep the selected app unmistakable on a TV from sofa distance.
+                    cardIcon?.animate()?.scaleX(if (focused) 1.035f else 1f)
+                        ?.scaleY(if (focused) 1.035f else 1f)?.setDuration(150)?.start()
+                    cardLabel?.apply {
+                        setTypeface(null, if (focused) android.graphics.Typeface.BOLD
+                            else android.graphics.Typeface.NORMAL)
+                        setShadowLayer(if (focused) 7f else 4f, 0f, 2f, Color.BLACK)
+                    }
                     if (focused) {
                         lastFocusedPackage = info.activityInfo.packageName
                         lastFocusedIndex = index
@@ -674,6 +684,7 @@ class MainActivity : Activity() {
             }
             // The extracted original pic_icon_bg asset is a wide 360:224 tile.
             // Keep the rendered tile close to that source aspect ratio.
+            cardIcon = icon
             item.addView(icon, LinearLayout.LayoutParams(
                 (iconWidthDp * density).toInt(),
                 (iconHeightDp * density).toInt()
@@ -686,8 +697,10 @@ class MainActivity : Activity() {
                 maxLines = 1
                 ellipsize = android.text.TextUtils.TruncateAt.END
                 setTextColor(Color.WHITE)
+                setShadowLayer(4f, 0f, 2f, Color.BLACK)
                 setPadding(0, (7f * density).toInt(), 0, 0)
             }
+            cardLabel = label
             item.addView(label, LinearLayout.LayoutParams(-1, -2))
 
             val lp = GridLayout.LayoutParams().apply {
