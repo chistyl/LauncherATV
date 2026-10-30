@@ -1494,7 +1494,8 @@ class MainActivity : Activity() {
                         .coerceAtMost(nextPageCount - 1).coerceAtLeast(0)
                     page++
                     lastFocusedIndex = targetIndex
-                    lastFocusedPackage = null
+                    lastFocusedPackage = desktopApps().getOrNull(page * pageSize + targetIndex)
+                        ?.activityInfo?.packageName
                     firstFocusOnRender = true
                     renderPage()
                     persistDesktopPosition()
@@ -1515,7 +1516,8 @@ class MainActivity : Activity() {
                         .coerceAtLeast(0)
                     page--
                     lastFocusedIndex = targetIndex
-                    lastFocusedPackage = null
+                    lastFocusedPackage = desktopApps().getOrNull(page * pageSize + targetIndex)
+                        ?.activityInfo?.packageName
                     firstFocusOnRender = true
                     renderPage()
                     persistDesktopPosition()
@@ -1560,7 +1562,8 @@ class MainActivity : Activity() {
                     if (next * pageSize < desktopApps().size) {
                         page = next
                         lastFocusedIndex = 0
-                        lastFocusedPackage = null
+                        lastFocusedPackage = desktopApps().getOrNull(page * pageSize)
+                            ?.activityInfo?.packageName
                         firstFocusOnRender = true
                         renderPage()
                         persistDesktopPosition()
@@ -1572,8 +1575,10 @@ class MainActivity : Activity() {
                 if (grid.hasFocus() && page > 0) {
                     if ((event?.repeatCount ?: 0) > 0) return true
                     page--
-                    lastFocusedIndex = pageSize - 1
-                    lastFocusedPackage = null
+                    lastFocusedIndex = (desktopApps().size - page * pageSize - 1)
+                        .coerceIn(0, pageSize - 1)
+                    lastFocusedPackage = desktopApps().getOrNull(page * pageSize + lastFocusedIndex)
+                        ?.activityInfo?.packageName
                     firstFocusOnRender = true
                     renderPage()
                     persistDesktopPosition()
