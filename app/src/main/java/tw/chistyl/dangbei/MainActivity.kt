@@ -224,13 +224,18 @@ class MainActivity : Activity() {
         foldersContainer = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, 4, 0, 4)
+            // Folder focus animation also grows beyond the normal tile bounds.
+            clipChildren = false
+            clipToPadding = false
+            setPadding(0, dp(4f), 0, dp(4f))
         }
         content.addView(foldersContainer, LinearLayout.LayoutParams(-1, dp(78f)))
 
         val footer = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
+            clipChildren = false
+            clipToPadding = false
             setPadding(0, dp(10f), 0, 0)
         }
         val hint = TextView(this).apply {
