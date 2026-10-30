@@ -248,7 +248,7 @@ class MainActivity : Activity() {
         }
         foldersScroll.addView(
             foldersContainer,
-            android.widget.HorizontalScrollView.LayoutParams(-2, -1)
+            ViewGroup.LayoutParams(-2, -1)
         )
         content.addView(foldersScroll, LinearLayout.LayoutParams(-1, dp(78f)))
 
