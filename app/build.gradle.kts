@@ -7,6 +7,10 @@ android {
     namespace = "tw.chistyl.dangbei"
     compileSdk = 35
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "tw.chistyl.dangbei"
         minSdk = 23
