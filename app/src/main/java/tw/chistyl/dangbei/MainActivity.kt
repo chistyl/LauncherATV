@@ -147,8 +147,8 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER_VERTICAL
         }
         val brand = TextView(this).apply {
-            text = "當貝桌面"
-            textSize = 25f
+            text = "LauncherATV"
+            textSize = 26f
             setTextColor(Color.WHITE)
             setShadowLayer(8f, 0f, 2f, Color.BLACK)
         }
@@ -178,8 +178,8 @@ class MainActivity : Activity() {
             setPadding(0, 26, 0, 12)
         }
         val section = TextView(this).apply {
-            text = "我的應用"
-            textSize = 19f
+            text = "電視 APP"
+            textSize = 22f
             setTextColor(Color.WHITE)
         }
         sectionRow.addView(section, LinearLayout.LayoutParams(0, -2, 1f))
@@ -212,7 +212,7 @@ class MainActivity : Activity() {
             setPadding(0, 10, 0, 0)
         }
         val hint = TextView(this).apply {
-            text = "方向鍵選擇　OK 開啟　MENU 桌面選項"
+            text = "方向鍵瀏覽　OK 開啟　長按管理 APP"
             textSize = 12f
             setTextColor(0xCCFFFFFF.toInt())
         }
@@ -546,14 +546,12 @@ class MainActivity : Activity() {
                 gravity = Gravity.CENTER
                 isFocusable = true
                 isFocusableInTouchMode = true
-                background = getDrawable(R.drawable.bg_app_list_item)
-                setPadding(12, 12, 12, 12)
+                background = appCardBackground(false)
+                setPadding(10, 10, 10, 10)
                 clipToPadding = false
                 setTag(info.activityInfo.packageName)
                 setOnFocusChangeListener { v, focused ->
-                    v.background = getDrawable(
-                        if (focused) R.drawable.focus_app_list_item else R.drawable.bg_app_list_item
-                    )
+                    v.background = appCardBackground(focused)
                     v.animate().scaleX(if (focused) 1.055f else 1f)
                         .scaleY(if (focused) 1.055f else 1f).setDuration(150).start()
                     v.elevation = if (focused) 12f else 0f
@@ -614,8 +612,8 @@ class MainActivity : Activity() {
             val icon = ImageView(this).apply {
                 setImageDrawable(appIcon(info))
                 scaleType = ImageView.ScaleType.FIT_CENTER
-                setBackgroundResource(R.drawable.pic_icon_bg)
-                setPadding(18, 8, 18, 8)
+                background = appIconPlate()
+                setPadding(12, 12, 12, 12)
                 contentDescription = appLabel(info)
             }
             // The extracted original pic_icon_bg asset is a wide 360:224 tile.
@@ -1182,6 +1180,28 @@ class MainActivity : Activity() {
             uiHandler.postDelayed(packageRefreshTask, 300L)
         }
     }
+
+    private fun appCardBackground(focused: Boolean): GradientDrawable =
+        GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            if (focused) intArrayOf(0xFF243F60.toInt(), 0xFF15263D.toInt())
+            else intArrayOf(0xCC182536.toInt(), 0xCC101A29.toInt())
+        ).apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 20f
+            setStroke(if (focused) 3 else 1,
+                if (focused) 0xFF65B8FF.toInt() else 0x44FFFFFF)
+        }
+
+    private fun appIconPlate(): GradientDrawable =
+        GradientDrawable(
+            GradientDrawable.Orientation.TL_BR,
+            intArrayOf(0xFF263B55.toInt(), 0xFF17263A.toInt())
+        ).apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 18f
+            setStroke(1, 0x33FFFFFF)
+        }
 
     private fun focusBackground(focused: Boolean): GradientDrawable =
         GradientDrawable().apply {
