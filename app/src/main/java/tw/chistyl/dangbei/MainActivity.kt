@@ -562,11 +562,12 @@ class MainActivity : Activity() {
         val visible = desktopList.drop(start).take(pageSize)
         // TV-first app shelf: wide Android TV banners, not enlarged phone icons.
         val density = resources.displayMetrics.density
-        val artworkWidthDp = 232f
-        val artworkHeightDp = 130f
-        val cardWidthDp = 252f
-        val cardHeightDp = 174f
-        val cardMarginDp = 12f
+        // Tighter TV shelf proportions: keep the 16:9 artwork while showing more apps per screen.
+        val artworkWidthDp = 208f
+        val artworkHeightDp = 117f
+        val cardWidthDp = 222f
+        val cardHeightDp = 154f
+        val cardMarginDp = 8f
         visible.forEachIndexed { index, info ->
             var cardIcon: ImageView? = null
             var cardLabel: TextView? = null
@@ -640,11 +641,13 @@ class MainActivity : Activity() {
             val artwork = ImageView(this).apply {
                 setImageDrawable(appIcon(info))
                 scaleType = ImageView.ScaleType.FIT_CENTER
-                background = GradientDrawable().apply {
+                background = GradientDrawable(
+                    GradientDrawable.Orientation.TOP_BOTTOM,
+                    intArrayOf(0x33232B35, 0x55202020)
+                ).apply {
                     shape = GradientDrawable.RECTANGLE
-                    cornerRadius = dp(9f).toFloat()
-                    setColor(0x18000000)
-                    setStroke(dp(1f), 0x33FFFFFF)
+                    cornerRadius = dp(8f).toFloat()
+                    setStroke(dp(1f), 0x22FFFFFF)
                 }
                 contentDescription = appLabel(info)
             }
