@@ -546,12 +546,15 @@ class MainActivity : Activity() {
                 gravity = Gravity.CENTER
                 isFocusable = true
                 isFocusableInTouchMode = true
-                background = appCardBackground(false)
+                background = getDrawable(R.drawable.bg_app_list_item)
                 setPadding(10, 10, 10, 10)
                 clipToPadding = false
                 setTag(info.activityInfo.packageName)
                 setOnFocusChangeListener { v, focused ->
-                    v.background = appCardBackground(focused)
+                    v.background = getDrawable(
+                        if (focused) R.drawable.focus_app_list_item
+                        else R.drawable.bg_app_list_item
+                    )
                     v.animate().scaleX(if (focused) 1.055f else 1f)
                         .scaleY(if (focused) 1.055f else 1f).setDuration(150).start()
                     v.elevation = if (focused) 12f else 0f
@@ -612,7 +615,7 @@ class MainActivity : Activity() {
             val icon = ImageView(this).apply {
                 setImageDrawable(appIcon(info))
                 scaleType = ImageView.ScaleType.FIT_CENTER
-                background = appIconPlate()
+                background = getDrawable(R.drawable.pic_icon_bg)
                 setPadding(12, 12, 12, 12)
                 contentDescription = appLabel(info)
             }
