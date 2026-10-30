@@ -1150,7 +1150,22 @@ class MainActivity : Activity() {
             actions.nextFocusUpId = if (up >= 0) folderItems[up].id else item.id
             actions.nextFocusDownId = if (down < folderItems.size) folderItems[down].id else item.id
         }
-        panel.addView(appGrid)
+        // Keep large folders usable on lower-resolution TVs: cap the grid
+        // height and let the ScrollView reveal the currently focused row.
+        val appScroll = android.widget.ScrollView(this).apply {
+            isFillViewport = true
+            isVerticalScrollBarEnabled = false
+            clipChildren = false
+            clipToPadding = false
+            descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
+        }
+        appScroll.addView(appGrid, android.widget.ScrollView.LayoutParams(-1, -2))
+        val folderRows = (members.size + 3) / 4
+        val desiredGridHeight = dp(20f + folderRows * 148f + 4f)
+        val maxGridHeight = (resources.displayMetrics.heightPixels * 0.55f).toInt()
+        panel.addView(appScroll, LinearLayout.LayoutParams(
+            -1, desiredGridHeight.coerceAtMost(maxGridHeight).coerceAtLeast(dp(150f))
+        ))
 
         val hint = TextView(this).apply {
             text = "OK 開啟　長按移出　返回關閉"
