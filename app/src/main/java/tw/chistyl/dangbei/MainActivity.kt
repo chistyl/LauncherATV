@@ -911,8 +911,11 @@ class MainActivity : Activity() {
             clipToPadding = false
             setPadding(0, dp(20f), 0, dp(4f))
         }
+        val folderItems = mutableListOf<View>()
+        val folderActionButtons = mutableListOf<View>()
         members.forEachIndexed { index, info ->
             val item = LinearLayout(this).apply {
+                id = View.generateViewId()
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER
                 isFocusable = true
@@ -1031,6 +1034,8 @@ class MainActivity : Activity() {
                 }
             }
             item.addView(actions, LinearLayout.LayoutParams(dp(42f), dp(34f)))
+            folderItems.add(item)
+            folderActionButtons.add(actions)
             val lp = GridLayout.LayoutParams().apply {
                 width = 0
                 // Reserve room for icon, label, and the focusable more-actions control.
@@ -1041,6 +1046,25 @@ class MainActivity : Activity() {
                 setMargins(gap, gap, gap, gap)
             }
             appGrid.addView(item, lp)
+        }
+        // Give the TV remote a predictable four-column focus map. Android's
+        // default geometric search can otherwise jump to the overflow action
+        // or skip a tile when the final row is incomplete.
+        folderItems.indices.forEach { index ->
+            val left = if (index % 4 > 0) index - 1 else -1
+            val right = if (index % 4 < 3 && index + 1 < folderItems.size) index + 1 else -1
+            val up = index - 4
+            val down = index + 4
+            val item = folderItems[index]
+            item.nextFocusLeftId = if (left >= 0) folderItems[left].id else item.id
+            item.nextFocusRightId = if (right >= 0) folderItems[right].id else item.id
+            item.nextFocusUpId = if (up >= 0) folderItems[up].id else item.id
+            item.nextFocusDownId = if (down < folderItems.size) folderItems[down].id else item.id
+            val actions = folderActionButtons[index]
+            actions.nextFocusLeftId = if (left >= 0) folderItems[left].id else item.id
+            actions.nextFocusRightId = if (right >= 0) folderItems[right].id else item.id
+            actions.nextFocusUpId = if (up >= 0) folderItems[up].id else item.id
+            actions.nextFocusDownId = if (down < folderItems.size) folderItems[down].id else item.id
         }
         panel.addView(appGrid)
 
