@@ -120,6 +120,13 @@ class MainActivity : Activity() {
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
     }
 
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // TV system overlays can briefly reveal navigation/status bars after
+        // dialogs or system surfaces close. Re-apply immersive mode on return.
+        if (hasFocus) hideSystemBars()
+    }
+
     private fun dp(value: Float): Int =
         (value * resources.displayMetrics.density + 0.5f).toInt()
 
