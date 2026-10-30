@@ -669,7 +669,7 @@ class MainActivity : Activity() {
         val artworkHeightDp = artworkWidthDp * 9f / 16f
         val cardHeightDp = artworkHeightDp + 38f
         visible.forEachIndexed { index, info ->
-            var cardIcon: ImageView? = null
+            var cardIcon: View? = null
             var cardLabel: TextView? = null
             val item = LinearLayout(this).apply {
                 id = View.generateViewId()
