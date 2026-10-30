@@ -1523,6 +1523,13 @@ class MainActivity : Activity() {
                 }
             }
             KeyEvent.KEYCODE_DPAD_DOWN -> {
+                val focusedFolderIndex = (0 until foldersContainer.childCount)
+                    .firstOrNull { foldersContainer.getChildAt(it) == currentFocus }
+                if (focusedFolderIndex != null && ::desktopSettingsButton.isInitialized) {
+                    // Keep the folder-to-footer route deterministic on TV remotes.
+                    desktopSettingsButton.requestFocus()
+                    return true
+                }
                 val index = grid.indexOfChild(currentFocus)
                 if (index >= 6 || (index >= 0 && index == grid.childCount - 1)) {
                     if (focusFirstFolder()) return true
