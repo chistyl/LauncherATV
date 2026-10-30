@@ -1277,7 +1277,7 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER_VERTICAL
             isFocusable = true
             isFocusableInTouchMode = true
-            setPadding(20, 12, 20, 12)
+            setPadding(dp(20f), dp(12f), dp(20f), dp(12f))
             background = focusBackground(false)
             setOnFocusChangeListener { v, focused ->
                 v.background = focusBackground(focused)
@@ -1295,7 +1295,7 @@ class MainActivity : Activity() {
             text = description
             textSize = 12f
             setTextColor(0xFFBFCBDA.toInt())
-            setPadding(0, 4, 0, 0)
+            setPadding(0, dp(4f), 0, 0)
         }
         row.addView(heading)
         row.addView(detail)
@@ -1305,7 +1305,7 @@ class MainActivity : Activity() {
     private fun showMenuPanel(titleText: String, actions: List<Triple<String, String, () -> Unit>>) {
         val panel = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(24, 22, 24, 20)
+            setPadding(dp(24f), dp(22f), dp(24f), dp(20f))
             background = GradientDrawable().apply {
                 cornerRadius = 20f
                 setColor(0xF0222935.toInt())
@@ -1316,15 +1316,15 @@ class MainActivity : Activity() {
             text = titleText
             textSize = 22f
             setTextColor(Color.WHITE)
-            setPadding(4, 0, 4, 16)
+            setPadding(dp(4f), 0, dp(4f), dp(16f))
         }
         panel.addView(title)
         actions.forEachIndexed { index, action ->
             panel.addView(menuAction(action.first, action.second) {
                 menuDialog?.dismiss()
                 action.third()
-            }, LinearLayout.LayoutParams(-1, 64).apply {
-                bottomMargin = if (index == actions.lastIndex) 0 else 8
+            }, LinearLayout.LayoutParams(-1, dp(64f)).apply {
+                bottomMargin = if (index == actions.lastIndex) 0 else dp(8f)
             })
         }
         menuDialog = AlertDialog.Builder(this).setView(panel)
