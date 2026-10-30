@@ -19,6 +19,7 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.EditText
@@ -236,7 +237,20 @@ class MainActivity : Activity() {
             clipToPadding = false
             setPadding(0, dp(4f), 0, dp(4f))
         }
-        content.addView(foldersContainer, LinearLayout.LayoutParams(-1, dp(78f)))
+        // Allow the folder row to scroll horizontally when users create
+        // more folders than can fit across the TV screen.
+        val foldersScroll = android.widget.HorizontalScrollView(this).apply {
+            isHorizontalScrollBarEnabled = false
+            isFillViewport = true
+            clipChildren = false
+            clipToPadding = false
+            descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
+        }
+        foldersScroll.addView(
+            foldersContainer,
+            android.widget.HorizontalScrollView.LayoutParams(-2, -1)
+        )
+        content.addView(foldersScroll, LinearLayout.LayoutParams(-1, dp(78f)))
 
         val footer = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
