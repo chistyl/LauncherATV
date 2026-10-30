@@ -50,7 +50,7 @@ class MainActivity : Activity() {
     private val apps = mutableListOf<android.content.pm.ResolveInfo>()
     private val appLabelCache = mutableMapOf<String, String>()
     private val appIconCache = mutableMapOf<String, Drawable.ConstantState>()
-    private val pageSize = 12
+    private val pageSize = 1000
     private var page = 0
     private var firstFocusOnRender = true
     private var lastFocusedPackage: String? = null
@@ -235,24 +235,25 @@ class MainActivity : Activity() {
         appSection.addView(appHeading)
 
         grid = GridLayout(this).apply {
-            columnCount = 12
-            rowCount = 1
+            // 固定五欄，APP 依序向下排列。
+            columnCount = 5
+            rowCount = 0
             useDefaultMargins = false
             alignmentMode = GridLayout.ALIGN_BOUNDS
             clipChildren = false
             clipToPadding = false
             setPadding(dp(4f), dp(12f), dp(4f), dp(20f))
         }
-        val appScroll = android.widget.HorizontalScrollView(this).apply {
-            isHorizontalScrollBarEnabled = false
-            isFillViewport = false
+        val appScroll = android.widget.ScrollView(this).apply {
+            isVerticalScrollBarEnabled = false
+            isFillViewport = true
             clipChildren = false
             clipToPadding = false
             descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
             overScrollMode = View.OVER_SCROLL_NEVER
         }
-        appScroll.addView(grid, ViewGroup.LayoutParams(-2, -2))
-        appSection.addView(appScroll, LinearLayout.LayoutParams(-1, dp(260f)))
+        appScroll.addView(grid, ViewGroup.LayoutParams(-1, -2))
+        appSection.addView(appScroll, LinearLayout.LayoutParams(-1, 0, 1f))
         content.addView(appSection, LinearLayout.LayoutParams(-1, 0, 1f))
 
         // Preserve folder data and management functions without showing a folder row.
@@ -594,10 +595,21 @@ class MainActivity : Activity() {
         }
 
         val icon = try { info.loadIcon(packageManager) } catch (_: Exception) { appIcon(info) }
-        val sample = android.graphics.Bitmap.createBitmap(12, 12, android.graphics.Bitmap.Config.ARGB_8888)
+        // FIT_CENTER 取樣原始圖示，保留比例與透明區，避免失真取色。
+        val sampleSize = 64
+        val sample = android.graphics.Bitmap.createBitmap(
+            sampleSize, sampleSize, android.graphics.Bitmap.Config.ARGB_8888
+        )
         val canvas = android.graphics.Canvas(sample)
         val oldBounds = android.graphics.Rect(icon.bounds)
-        icon.setBounds(0, 0, 12, 12)
+        val intrinsicW = icon.intrinsicWidth.takeIf { it > 0 } ?: sampleSize
+        val intrinsicH = icon.intrinsicHeight.takeIf { it > 0 } ?: sampleSize
+        val scale = minOf(sampleSize.toFloat() / intrinsicW, sampleSize.toFloat() / intrinsicH)
+        val drawW = (intrinsicW * scale).toInt().coerceAtLeast(1)
+        val drawH = (intrinsicH * scale).toInt().coerceAtLeast(1)
+        val left = (sampleSize - drawW) / 2
+        val top = (sampleSize - drawH) / 2
+        icon.setBounds(left, top, left + drawW, top + drawH)
         icon.draw(canvas)
         icon.bounds = oldBounds
 
@@ -605,7 +617,7 @@ class MainActivity : Activity() {
         var green = 0L
         var blueChannel = 0L
         var count = 0L
-        for (y in 0 until 12) for (x in 0 until 12) {
+        for (y in 0 until sampleSize) for (x in 0 until sampleSize) {
             val color = sample.getPixel(x, y)
             if (android.graphics.Color.alpha(color) > 24) {
                 red += android.graphics.Color.red(color)
@@ -647,12 +659,15 @@ class MainActivity : Activity() {
         val visible = desktopList.drop(start).take(pageSize)
         // TV-first app shelf: wide Android TV banners, not enlarged phone icons.
         val density = resources.displayMetrics.density
-        // Tighter TV shelf proportions: keep the 16:9 artwork while showing more apps per screen.
-        val artworkWidthDp = 208f
-        val artworkHeightDp = 117f
-        val cardWidthDp = 222f
-        val cardHeightDp = 154f
-        val cardMarginDp = 8f
+        // 五欄等寬排列；依可用螢幕寬度計算卡片尺寸，確保第五欄完整顯示。
+        val screenWidthDp = resources.displayMetrics.widthPixels / density
+        val sideInsetDp = (screenWidthDp * 0.055f).coerceIn(42f, 88f)
+        val cardMarginDp = 6f
+        val cardWidthDp = ((screenWidthDp - sideInsetDp * 2f - 8f) / 5f
+            - cardMarginDp * 2f).coerceAtLeast(112f)
+        val artworkWidthDp = cardWidthDp - 12f
+        val artworkHeightDp = artworkWidthDp * 9f / 16f
+        val cardHeightDp = artworkHeightDp + 38f
         visible.forEachIndexed { index, info ->
             var cardIcon: ImageView? = null
             var cardLabel: TextView? = null
@@ -756,23 +771,29 @@ class MainActivity : Activity() {
             val lp = GridLayout.LayoutParams().apply {
                 width = dp(cardWidthDp)
                 height = dp(cardHeightDp)
-                columnSpec = GridLayout.spec(index)
-                rowSpec = GridLayout.spec(0)
+                columnSpec = GridLayout.spec(index % 5)
+                rowSpec = GridLayout.spec(index / 5)
                 val margin = dp(cardMarginDp)
                 setMargins(margin, margin, margin, margin)
             }
             grid.addView(item, lp)
         }
 
-        // Explicit horizontal focus map matches the Apple TV-style app shelf.
+        // 五欄網格的遙控器焦點依上下左右移動。
         for (index in 0 until grid.childCount) {
             val item = grid.getChildAt(index)
-            if (index > 0) item.nextFocusLeftId = grid.getChildAt(index - 1).id
-            if (index + 1 < grid.childCount) item.nextFocusRightId = grid.getChildAt(index + 1).id
-            item.nextFocusUpId = if (index == 0 && ::desktopSettingsButton.isInitialized) {
-                desktopSettingsButton.id
+            if (index % 5 > 0) item.nextFocusLeftId = grid.getChildAt(index - 1).id
+            if (index % 5 < 4 && index + 1 < grid.childCount) {
+                item.nextFocusRightId = grid.getChildAt(index + 1).id
+            }
+            item.nextFocusUpId = when {
+                index < 5 && ::desktopSettingsButton.isInitialized -> desktopSettingsButton.id
+                index - 5 >= 0 -> grid.getChildAt(index - 5).id
+                else -> item.id
+            }
+            item.nextFocusDownId = if (index + 5 < grid.childCount) {
+                grid.getChildAt(index + 5).id
             } else item.id
-            item.nextFocusDownId = item.id
         }
         if (grid.childCount > 0 && ::desktopSettingsButton.isInitialized) {
             desktopSettingsButton.nextFocusDownId = grid.getChildAt(0).id
