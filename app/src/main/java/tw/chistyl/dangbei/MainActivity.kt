@@ -713,7 +713,7 @@ class MainActivity : Activity() {
                 gravity = Gravity.CENTER_VERTICAL
                 isFocusable = true
                 isFocusableInTouchMode = true
-                setPadding(14, 8, 16, 8)
+                setPadding(dp(14f), dp(8f), dp(16f), dp(8f))
                 background = getDrawable(R.drawable.icon_menu_folder_nor)
                 tag = name
                 setOnFocusChangeListener { v, focused ->
@@ -759,11 +759,11 @@ class MainActivity : Activity() {
                 setImageResource(R.drawable.file_manager_icon_file_folder)
                 scaleType = ImageView.ScaleType.FIT_CENTER
             }
-            tile.addView(icon, LinearLayout.LayoutParams(38, 38))
+            tile.addView(icon, LinearLayout.LayoutParams(dp(38f), dp(38f)))
             val textColumn = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(10, 0, 0, 0)
+                setPadding(dp(10f), 0, 0, 0)
             }
             val label = TextView(this).apply {
                 text = name
@@ -780,8 +780,8 @@ class MainActivity : Activity() {
             textColumn.addView(label)
             textColumn.addView(subLabel)
             tile.addView(textColumn, LinearLayout.LayoutParams(0, -2, 1f))
-            foldersContainer.addView(tile, LinearLayout.LayoutParams(150, 58).apply {
-                marginEnd = 12
+            foldersContainer.addView(tile, LinearLayout.LayoutParams(dp(150f), dp(58f)).apply {
+                marginEnd = dp(12f)
             })
         }
     }
