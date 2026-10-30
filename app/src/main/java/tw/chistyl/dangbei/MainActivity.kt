@@ -676,7 +676,6 @@ class MainActivity : Activity() {
                 height = dp(cardHeightDp)
                 columnSpec = GridLayout.spec(index)
                 rowSpec = GridLayout.spec(0)
-                width = dp(cardWidthDp)
                 val margin = dp(cardMarginDp)
                 setMargins(margin, margin, margin, margin)
             }
@@ -1607,18 +1606,13 @@ class MainActivity : Activity() {
             }
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 val index = grid.indexOfChild(currentFocus)
-                val isRightEdge = index >= 0 &&
-                    (index % 6 == 5 || index == grid.childCount - 1)
+                val isRightEdge = index >= 0 && index == grid.childCount - 1
                 if (isRightEdge && (page + 1) * pageSize < desktopApps().size) {
                     // A held remote key emits repeat events; turn a page only once per press.
                     if ((event?.repeatCount ?: 0) > 0) return true
-                    val column = index % 6
-                    val row = index / 6
                     val nextPageCount = (desktopApps().size - (page + 1) * pageSize)
                         .coerceIn(0, pageSize)
-                    val targetRow = if (row == 1 && nextPageCount > 6) 1 else 0
-                    val targetIndex = (targetRow * 6 + column)
-                        .coerceAtMost(nextPageCount - 1).coerceAtLeast(0)
+                    val targetIndex = 0.coerceAtMost(nextPageCount - 1).coerceAtLeast(0)
                     page++
                     lastFocusedIndex = targetIndex
                     lastFocusedPackage = desktopApps().getOrNull(page * pageSize + targetIndex)
@@ -1631,20 +1625,16 @@ class MainActivity : Activity() {
             }
             KeyEvent.KEYCODE_DPAD_LEFT -> {
                 val index = grid.indexOfChild(currentFocus)
-                if (index >= 0 && index % 6 == 0 && page > 0) {
+                if (index == 0 && page > 0) {
                     // Avoid skipping several pages when the user holds LEFT.
                     if ((event?.repeatCount ?: 0) > 0) return true
-                    val row = index / 6
                     val desktop = desktopApps()
                     val previousPage = page - 1
                     // Count items on the destination page, not the current page.
                     // The current page may be the short final page.
                     val previousPageCount = (desktop.size - previousPage * pageSize)
                         .coerceIn(0, pageSize)
-                    val targetRow = if (row == 1 && previousPageCount > 6) 1 else 0
-                    val targetIndex = (targetRow * 6 + 5)
-                        .coerceAtMost(previousPageCount - 1)
-                        .coerceAtLeast(0)
+                    val targetIndex = (previousPageCount - 1).coerceAtLeast(0)
                     page = previousPage
                     lastFocusedIndex = targetIndex
                     lastFocusedPackage = desktop.getOrNull(page * pageSize + targetIndex)
@@ -1652,37 +1642,6 @@ class MainActivity : Activity() {
                     firstFocusOnRender = true
                     renderPage()
                     persistDesktopPosition()
-                    return true
-                }
-            }
-            KeyEvent.KEYCODE_DPAD_DOWN -> {
-                val focusedFolderIndex = (0 until foldersContainer.childCount)
-                    .firstOrNull { foldersContainer.getChildAt(it) == currentFocus }
-                if (focusedFolderIndex != null && ::desktopSettingsButton.isInitialized) {
-                    // Keep the folder-to-footer route deterministic on TV remotes.
-                    desktopSettingsButton.requestFocus()
-                    return true
-                }
-                val index = grid.indexOfChild(currentFocus)
-                if (index >= 6 || (index >= 0 && index == grid.childCount - 1)) {
-                    if (focusFirstFolder()) return true
-                    if (::desktopSettingsButton.isInitialized) {
-                        desktopSettingsButton.requestFocus()
-                        return true
-                    }
-                }
-            }
-            KeyEvent.KEYCODE_DPAD_UP -> {
-                val folderIndex = (0 until foldersContainer.childCount)
-                    .firstOrNull { foldersContainer.getChildAt(it) == currentFocus }
-                if (folderIndex != null) {
-                    // Moving UP from a folder returns to the app grid in the
-                    // previously used column, instead of jumping to column one.
-                    focusLastAppInColumn(lastFocusedIndex % 6)
-                    return true
-                }
-                if (currentFocus == desktopSettingsButton) {
-                    if (!focusFirstFolder()) focusLastAppInColumn(0)
                     return true
                 }
             }
