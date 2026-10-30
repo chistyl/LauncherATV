@@ -3,7 +3,7 @@
     <uses-feature android:name="android.software.leanback" android:required="false"/>
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
-    <application android:theme="@style/AppTheme" android:label="當貝桌面重建版"
+    <application android:theme="@style/AppTheme" android:label="LauncherATV"
         android:banner="@drawable/app_focus">
         <activity android:name=".MainActivity" android:screenOrientation="landscape"
             android:launchMode="singleTask"
