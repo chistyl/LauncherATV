@@ -224,7 +224,7 @@ class MainActivity : Activity() {
         appSection.addView(appHeading)
 
         grid = GridLayout(this).apply {
-            columnCount = 6
+            columnCount = 12
             rowCount = 1
             useDefaultMargins = false
             alignmentMode = GridLayout.ALIGN_BOUNDS
