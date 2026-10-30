@@ -1032,6 +1032,14 @@ class MainActivity : Activity() {
                                 }
                             }
                         }.setNegativeButton("取消", null).create()
+                    actionDialog.setOnShowListener {
+                        // Place D-pad focus on the first action immediately
+                        // instead of leaving focus on the underlying folder tile.
+                        actionDialog.listView?.let { list ->
+                            list.setSelection(0)
+                            list.requestFocus()
+                        }
+                    }
                     actionDialog.setOnDismissListener {
                         // Returning from the app-action list restores focus to
                         // the same APP's overflow control, unless the folder
