@@ -38,6 +38,9 @@ class MainActivity : Activity() {
     private lateinit var dateLabel: TextView
     private lateinit var networkLabel: TextView
     private lateinit var desktopSettingsButton: TextView
+    private lateinit var heroIcon: ImageView
+    private lateinit var heroTitle: TextView
+    private lateinit var heroSubtitle: TextView
     private val uiHandler = Handler(Looper.getMainLooper())
     private val statusRefreshTask = object : Runnable {
         override fun run() {
@@ -143,7 +146,7 @@ class MainActivity : Activity() {
         }
         root.addView(bg, FrameLayout.LayoutParams(-1, -1))
 
-        // Emotn UI keeps the wallpaper as the visual focus.
+        // Apple TV-inspired layout keeps cinematic wallpaper and featured content in focus.
         val shade = View(this).apply {
             background = GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
@@ -208,8 +211,52 @@ class MainActivity : Activity() {
         header.addView(dateLabel)
         content.addView(header)
 
-        val spacer = View(this)
-        content.addView(spacer, LinearLayout.LayoutParams(1, 0, 1f))
+        // Apple TV-inspired featured area: selected app artwork and title
+        // occupy the upper canvas while the app shelf stays anchored at the bottom.
+        val hero = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            clipChildren = false
+            clipToPadding = false
+            setPadding(dp(8f), dp(8f), 0, dp(24f))
+        }
+        heroIcon = ImageView(this).apply {
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            background = GradientDrawable().apply {
+                cornerRadius = dp(22f).toFloat()
+                setColor(0x33202020)
+                setStroke(dp(1f), 0x44FFFFFF)
+            }
+            setPadding(dp(24f), dp(24f), dp(24f), dp(24f))
+            elevation = dp(12f).toFloat()
+        }
+        hero.addView(heroIcon, LinearLayout.LayoutParams(dp(190f), dp(190f)).apply {
+            rightMargin = dp(34f)
+        })
+        val heroText = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        heroTitle = TextView(this).apply {
+            text = "歡迎使用"
+            textSize = 38f
+            maxLines = 1
+            ellipsize = android.text.TextUtils.TruncateAt.END
+            setTextColor(Color.WHITE)
+            setShadowLayer(10f, 0f, 3f, Color.BLACK)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }
+        heroSubtitle = TextView(this).apply {
+            text = "選擇下方 App 開始觀看"
+            textSize = 17f
+            setTextColor(0xFFE2E6EC.toInt())
+            setShadowLayer(6f, 0f, 2f, Color.BLACK)
+            setPadding(0, dp(12f), 0, 0)
+        }
+        heroText.addView(heroTitle)
+        heroText.addView(heroSubtitle)
+        hero.addView(heroText, LinearLayout.LayoutParams(0, -2, 1f))
+        content.addView(hero, LinearLayout.LayoutParams(-1, 0, 1f))
 
         val appSection = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -217,7 +264,7 @@ class MainActivity : Activity() {
             clipToPadding = false
         }
         val appHeading = TextView(this).apply {
-            text = "My apps"
+            text = "我的 App"
             textSize = 17f
             setTextColor(0xFFF5F7FA.toInt())
             setShadowLayer(4f, 0f, 1f, Color.BLACK)
@@ -550,7 +597,7 @@ class MainActivity : Activity() {
         page = page.coerceIn(0, maxPage)
         val start = page * pageSize
         val visible = desktopList.drop(start).take(pageSize)
-        // Emotn-style shortcut tiles: one horizontal row of wide app banners.
+        // Apple TV-style app shelf: generous spacing and softly elevated app tiles.
         val density = resources.displayMetrics.density
         val iconWidthDp = 168f
         val iconHeightDp = 96f
@@ -588,6 +635,7 @@ class MainActivity : Activity() {
                     if (focused) {
                         lastFocusedPackage = info.activityInfo.packageName
                         lastFocusedIndex = index
+                        updateHero(info)
                         persistDesktopPosition()
                     }
                 }
@@ -682,7 +730,7 @@ class MainActivity : Activity() {
             grid.addView(item, lp)
         }
 
-        // Explicit horizontal focus map matches Emotn's single app shortcut row.
+        // Explicit horizontal focus map matches the Apple TV-style app shelf.
         for (index in 0 until grid.childCount) {
             val item = grid.getChildAt(index)
             if (index > 0) item.nextFocusLeftId = grid.getChildAt(index - 1).id
@@ -706,6 +754,7 @@ class MainActivity : Activity() {
             val target = if (remembered >= 0) remembered
                 else lastFocusedIndex.coerceIn(0, grid.childCount - 1)
             grid.getChildAt(target).requestFocus()
+            updateHero(visible[target])
             firstFocusOnRender = false
         } else if (grid.childCount == 0 && (firstFocusOnRender || !grid.hasFocus())) {
             // If every app is hidden or assigned to folders, keep a usable
@@ -715,6 +764,14 @@ class MainActivity : Activity() {
                 desktopSettingsButton.requestFocus()
             }
         }
+    }
+
+    private fun updateHero(info: android.content.pm.ResolveInfo) {
+        if (!::heroIcon.isInitialized || !::heroTitle.isInitialized || !::heroSubtitle.isInitialized) return
+        heroIcon.setImageDrawable(appIcon(info))
+        heroIcon.contentDescription = appLabel(info)
+        heroTitle.text = appLabel(info)
+        heroSubtitle.text = "按 OK 開啟 · 長按可管理應用程式"
     }
 
     private fun renderFolders() {
