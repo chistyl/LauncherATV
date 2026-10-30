@@ -124,7 +124,10 @@ class MainActivity : Activity() {
         (value * resources.displayMetrics.density + 0.5f).toInt()
 
     private fun buildHome() {
-        val root = FrameLayout(this)
+        val root = FrameLayout(this).apply {
+            clipChildren = false
+            clipToPadding = false
+        }
         val bg = ImageView(this).apply {
             setImageResource(R.drawable.bg_launcher_default_new)
             scaleType = ImageView.ScaleType.CENTER_CROP
@@ -142,6 +145,8 @@ class MainActivity : Activity() {
 
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
+            clipChildren = false
+            clipToPadding = false
             setPadding(dp(54f), dp(30f), dp(54f), dp(22f))
         }
 
@@ -208,6 +213,10 @@ class MainActivity : Activity() {
             rowCount = 2
             useDefaultMargins = false
             alignmentMode = GridLayout.ALIGN_BOUNDS
+            // Focused tiles scale beyond their measured bounds; keep the glow
+            // visible at the first/last columns and the top/bottom rows.
+            clipChildren = false
+            clipToPadding = false
             setPadding(0, 0, 0, 0)
         }
         content.addView(grid, LinearLayout.LayoutParams(-1, 0, 1f))
