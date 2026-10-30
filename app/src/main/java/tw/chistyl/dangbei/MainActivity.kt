@@ -587,7 +587,7 @@ class MainActivity : Activity() {
         if (hasTvBanner(info)) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(0x33232B35, 0x55202020)
+                intArrayOf(0xFF263746.toInt(), 0xFF1B2938.toInt())
             ).apply {
                 cornerRadius = dp(8f).toFloat()
                 setStroke(dp(1f), 0x22FFFFFF)
@@ -677,12 +677,12 @@ class MainActivity : Activity() {
                 gravity = Gravity.CENTER
                 isFocusable = true
                 isFocusableInTouchMode = true
-                background = getDrawable(R.drawable.bg_app_list_item)
+                background = appCardBackground(false)
                 setPadding(dp(6f), dp(6f), dp(6f), dp(6f))
                 clipToPadding = false
                 setTag(info.activityInfo.packageName)
                 setOnFocusChangeListener { v, focused ->
-                    v.background = getDrawable(if (focused) R.drawable.focus_app_list_item else R.drawable.bg_app_list_item)
+                    v.background = appCardBackground(focused)
                     v.animate().scaleX(if (focused) 1.055f else 1f)
                         .scaleY(if (focused) 1.055f else 1f).setDuration(150).start()
                     v.elevation = if (focused) dp(12f).toFloat() else 0f
@@ -1524,7 +1524,7 @@ class MainActivity : Activity() {
         GradientDrawable(
             GradientDrawable.Orientation.TOP_BOTTOM,
             if (focused) intArrayOf(0xFF243F60.toInt(), 0xFF15263D.toInt())
-            else intArrayOf(0xCC182536.toInt(), 0xCC101A29.toInt())
+            else intArrayOf(0xFF182536.toInt(), 0xFF101A29.toInt())
         ).apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = 20f
