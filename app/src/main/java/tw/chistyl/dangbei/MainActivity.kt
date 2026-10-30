@@ -1073,7 +1073,28 @@ class MainActivity : Activity() {
                 val folderTile = (0 until foldersContainer.childCount)
                     .map { foldersContainer.getChildAt(it) }
                     .firstOrNull { it.tag == name && it.isFocusable }
-                folderTile?.requestFocus()
+                if (folderTile != null) {
+                    folderTile.requestFocus()
+                } else {
+                    // The folder may have been emptied or removed while its
+                    // dialog was open. Never leave TV focus on a detached view.
+                    val desktop = desktopApps()
+                    if (desktop.isNotEmpty()) {
+                        val targetIndex = lastFocusedPackage?.let { pkg ->
+                            desktop.indexOfFirst { it.activityInfo.packageName == pkg }
+                        }?.takeIf { it >= 0 } ?: (
+                            page * pageSize + lastFocusedIndex
+                        ).coerceIn(0, desktop.lastIndex)
+                        page = targetIndex / pageSize
+                        lastFocusedIndex = targetIndex % pageSize
+                        lastFocusedPackage = desktop[targetIndex].activityInfo.packageName
+                        firstFocusOnRender = true
+                        renderPage()
+                        persistDesktopPosition()
+                    } else if (::desktopSettingsButton.isInitialized) {
+                        desktopSettingsButton.requestFocus()
+                    }
+                }
             }
         }
         activeFolderDialog = folderDialog
