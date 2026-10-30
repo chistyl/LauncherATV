@@ -544,7 +544,7 @@ class MainActivity : Activity() {
         val drawable = try {
             pm.getActivityBanner(component)
                 ?: pm.getApplicationBanner(pkg)
-                ?: info.loadBanner(pm)
+                ?: pm.getDrawable(pkg, info.activityInfo.icon, info.activityInfo.applicationInfo)
                 ?: info.loadIcon(pm)
         } catch (_: Exception) {
             info.loadIcon(pm)
