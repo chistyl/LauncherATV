@@ -165,7 +165,7 @@ class MainActivity : Activity() {
         }
         val status = TextView(this).apply {
             text = "●"
-            textSize = 15f
+            textSize = 16f
             setTextColor(0xFFEAF4FF.toInt())
             setShadowLayer(5f, 0f, 1f, Color.BLACK)
         }
@@ -548,13 +548,13 @@ class MainActivity : Activity() {
         page = page.coerceIn(0, maxPage)
         val start = page * pageSize
         val visible = desktopList.drop(start).take(pageSize)
-        // Apple TV-style app shelf: generous spacing and softly elevated app tiles.
+        // Dangbei 4.1.7-inspired launcher icons: large square app artwork in one horizontal shelf.
         val density = resources.displayMetrics.density
-        val iconWidthDp = 168f
-        val iconHeightDp = 96f
+        val iconWidthDp = 156f
+        val iconHeightDp = 156f
         val cardWidthDp = 184f
-        val cardHeightDp = 148f
-        val cardMarginDp = 8f
+        val cardHeightDp = 220f
+        val cardMarginDp = 10f
         visible.forEachIndexed { index, info ->
             val pm = packageManager
             var cardIcon: ImageView? = null
@@ -575,9 +575,9 @@ class MainActivity : Activity() {
                     v.animate().scaleX(if (focused) 1.07f else 1f)
                         .scaleY(if (focused) 1.07f else 1f).setDuration(150).start()
                     v.elevation = if (focused) dp(10f).toFloat() else 0f
-                    // Keep the selected app unmistakable on a TV from sofa distance.
-                    cardIcon?.animate()?.scaleX(if (focused) 1.035f else 1f)
-                        ?.scaleY(if (focused) 1.035f else 1f)?.setDuration(150)?.start()
+                    // The original launcher emphasizes the selected app icon with a crisp white focus frame.
+                    cardIcon?.animate()?.scaleX(if (focused) 1.025f else 1f)
+                        ?.scaleY(if (focused) 1.025f else 1f)?.setDuration(150)?.start()
                     cardLabel?.apply {
                         setTypeface(null, if (focused) android.graphics.Typeface.BOLD
                             else android.graphics.Typeface.NORMAL)
@@ -586,7 +586,6 @@ class MainActivity : Activity() {
                     if (focused) {
                         lastFocusedPackage = info.activityInfo.packageName
                         lastFocusedIndex = index
-                        updateHero(info)
                         persistDesktopPosition()
                     }
                 }
@@ -642,10 +641,12 @@ class MainActivity : Activity() {
                 setImageDrawable(appIcon(info))
                 scaleType = ImageView.ScaleType.FIT_CENTER
                 background = GradientDrawable().apply {
-                    cornerRadius = dp(12f).toFloat()
-                    setColor(0xD9000000.toInt())
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = dp(16f).toFloat()
+                    setColor(0x22FFFFFF)
+                    setStroke(dp(1f), 0x55FFFFFF)
                 }
-                val iconPadding = dp(10f)
+                val iconPadding = dp(12f)
                 setPadding(iconPadding, iconPadding, iconPadding, iconPadding)
                 contentDescription = appLabel(info)
             }
@@ -705,7 +706,6 @@ class MainActivity : Activity() {
             val target = if (remembered >= 0) remembered
                 else lastFocusedIndex.coerceIn(0, grid.childCount - 1)
             grid.getChildAt(target).requestFocus()
-            updateHero(visible[target])
             firstFocusOnRender = false
         } else if (grid.childCount == 0 && (firstFocusOnRender || !grid.hasFocus())) {
             // If every app is hidden or assigned to folders, keep a usable
@@ -715,14 +715,6 @@ class MainActivity : Activity() {
                 desktopSettingsButton.requestFocus()
             }
         }
-    }
-
-    private fun updateHero(info: android.content.pm.ResolveInfo) {
-        if (!::heroIcon.isInitialized || !::heroTitle.isInitialized || !::heroSubtitle.isInitialized) return
-        heroIcon.setImageDrawable(appIcon(info))
-        heroIcon.contentDescription = appLabel(info)
-        heroTitle.text = appLabel(info)
-        heroSubtitle.text = "按 OK 開啟 · 長按可管理應用程式"
     }
 
     private fun renderFolders() {
