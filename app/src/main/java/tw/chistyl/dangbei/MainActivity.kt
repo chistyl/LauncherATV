@@ -146,10 +146,19 @@ class MainActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
+        val brandIcon = ImageView(this).apply {
+            setImageResource(R.drawable.logo)
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            contentDescription = "當貝桌面"
+        }
+        header.addView(brandIcon, LinearLayout.LayoutParams(42, 42).apply {
+            rightMargin = 12
+        })
         val brand = TextView(this).apply {
-            text = "LauncherATV"
-            textSize = 26f
+            text = "當貝桌面"
+            textSize = 25f
             setTextColor(Color.WHITE)
+            setTypeface(null, android.graphics.Typeface.BOLD)
             setShadowLayer(8f, 0f, 2f, Color.BLACK)
         }
         header.addView(brand, LinearLayout.LayoutParams(0, -2, 1f))
@@ -178,8 +187,9 @@ class MainActivity : Activity() {
             setPadding(0, 26, 0, 12)
         }
         val section = TextView(this).apply {
-            text = "電視 APP"
+            text = "我的應用"
             textSize = 22f
+            setTypeface(null, android.graphics.Typeface.BOLD)
             setTextColor(Color.WHITE)
         }
         sectionRow.addView(section, LinearLayout.LayoutParams(0, -2, 1f))
