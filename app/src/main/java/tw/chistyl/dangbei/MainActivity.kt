@@ -860,7 +860,9 @@ class MainActivity : Activity() {
 
         val panel = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(28, 22, 28, 24)
+            clipChildren = false
+            clipToPadding = false
+            setPadding(dp(28f), dp(22f), dp(28f), dp(24f))
             background = GradientDrawable().apply {
                 cornerRadius = 22f
                 setColor(0xF0222935.toInt())
@@ -891,7 +893,9 @@ class MainActivity : Activity() {
         val appGrid = GridLayout(this).apply {
             columnCount = 4
             useDefaultMargins = false
-            setPadding(0, 20, 0, 4)
+            clipChildren = false
+            clipToPadding = false
+            setPadding(0, dp(20f), 0, dp(4f))
         }
         members.forEachIndexed { index, info ->
             val item = LinearLayout(this).apply {
@@ -899,7 +903,7 @@ class MainActivity : Activity() {
                 gravity = Gravity.CENTER
                 isFocusable = true
                 isFocusableInTouchMode = true
-                setPadding(10, 10, 10, 10)
+                setPadding(dp(10f), dp(10f), dp(10f), dp(10f))
                 background = getDrawable(R.drawable.bg_app_list_item)
                 setOnFocusChangeListener { v, focused ->
                     if (focused) {
@@ -937,7 +941,7 @@ class MainActivity : Activity() {
                 setImageDrawable(info.loadIcon(packageManager))
                 scaleType = ImageView.ScaleType.FIT_CENTER
             }
-            item.addView(icon, LinearLayout.LayoutParams(66, 66))
+            item.addView(icon, LinearLayout.LayoutParams(dp(66f), dp(66f)))
             val label = TextView(this).apply {
                 text = appLabel(info)
                 textSize = 12f
@@ -945,7 +949,7 @@ class MainActivity : Activity() {
                 maxLines = 1
                 ellipsize = android.text.TextUtils.TruncateAt.END
                 setTextColor(Color.WHITE)
-                setPadding(0, 8, 0, 0)
+                setPadding(0, dp(8f), 0, 0)
             }
             item.addView(label, LinearLayout.LayoutParams(-1, -2))
             val actions = TextView(this).apply {
@@ -1007,13 +1011,14 @@ class MainActivity : Activity() {
                         }.setNegativeButton("取消", null).show()
                 }
             }
-            item.addView(actions, LinearLayout.LayoutParams(42, 34))
+            item.addView(actions, LinearLayout.LayoutParams(dp(42f), dp(34f)))
             val lp = GridLayout.LayoutParams().apply {
                 width = 0
-                height = 112
+                height = dp(112f)
                 columnSpec = GridLayout.spec(index % 4, 1f)
                 rowSpec = GridLayout.spec(index / 4)
-                setMargins(6, 6, 6, 6)
+                val gap = dp(6f)
+                setMargins(gap, gap, gap, gap)
             }
             appGrid.addView(item, lp)
         }
@@ -1023,7 +1028,7 @@ class MainActivity : Activity() {
             text = "OK 開啟　長按移出　返回關閉"
             textSize = 12f
             setTextColor(0xFFB8C4D4.toInt())
-            setPadding(2, 12, 0, 0)
+            setPadding(dp(2f), dp(12f), 0, 0)
         }
         panel.addView(hint)
 
