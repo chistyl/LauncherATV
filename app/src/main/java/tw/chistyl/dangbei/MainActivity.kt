@@ -38,9 +38,6 @@ class MainActivity : Activity() {
     private lateinit var dateLabel: TextView
     private lateinit var networkLabel: TextView
     private lateinit var desktopSettingsButton: TextView
-    private lateinit var heroIcon: ImageView
-    private lateinit var heroTitle: TextView
-    private lateinit var heroSubtitle: TextView
     private val uiHandler = Handler(Looper.getMainLooper())
     private val statusRefreshTask = object : Runnable {
         override fun run() {
@@ -146,11 +143,11 @@ class MainActivity : Activity() {
         }
         root.addView(bg, FrameLayout.LayoutParams(-1, -1))
 
-        // Apple TV-inspired layout keeps cinematic wallpaper and featured content in focus.
+        // Dangbei 4.1.7 reference layout: wallpaper, compact header and app icon shelf.
         val shade = View(this).apply {
             background = GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(0x18000000, 0x00000000, 0x99000000.toInt())
+                intArrayOf(0x10000000, 0x00000000, 0x55000000)
             )
         }
         root.addView(shade, FrameLayout.LayoutParams(-1, -1))
@@ -211,75 +208,29 @@ class MainActivity : Activity() {
         header.addView(dateLabel)
         content.addView(header)
 
-        // Apple TV-inspired featured area: selected app artwork and title
-        // occupy the upper canvas while the app shelf stays anchored at the bottom.
-        val hero = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            clipChildren = false
-            clipToPadding = false
-            setPadding(dp(8f), dp(8f), 0, dp(24f))
-        }
-        heroIcon = ImageView(this).apply {
-            scaleType = ImageView.ScaleType.FIT_CENTER
-            background = GradientDrawable().apply {
-                cornerRadius = dp(22f).toFloat()
-                setColor(0x33202020)
-                setStroke(dp(1f), 0x44FFFFFF)
-            }
-            setPadding(dp(24f), dp(24f), dp(24f), dp(24f))
-            elevation = dp(12f).toFloat()
-        }
-        hero.addView(heroIcon, LinearLayout.LayoutParams(dp(190f), dp(190f)).apply {
-            rightMargin = dp(34f)
-        })
-        val heroText = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_VERTICAL
-        }
-        heroTitle = TextView(this).apply {
-            text = "歡迎使用"
-            textSize = 38f
-            maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
-            setTextColor(Color.WHITE)
-            setShadowLayer(10f, 0f, 3f, Color.BLACK)
-            setTypeface(null, android.graphics.Typeface.BOLD)
-        }
-        heroSubtitle = TextView(this).apply {
-            text = "選擇下方 App 開始觀看"
-            textSize = 17f
-            setTextColor(0xFFE2E6EC.toInt())
-            setShadowLayer(6f, 0f, 2f, Color.BLACK)
-            setPadding(0, dp(12f), 0, 0)
-        }
-        heroText.addView(heroTitle)
-        heroText.addView(heroSubtitle)
-        hero.addView(heroText, LinearLayout.LayoutParams(0, -2, 1f))
-        content.addView(hero, LinearLayout.LayoutParams(-1, 0, 1f))
-
         val appSection = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
             clipChildren = false
             clipToPadding = false
         }
         val appHeading = TextView(this).apply {
-            text = "我的 App"
-            textSize = 17f
+            text = "應用程式"
+            textSize = 20f
             setTextColor(0xFFF5F7FA.toInt())
             setShadowLayer(4f, 0f, 1f, Color.BLACK)
-            setPadding(dp(4f), 0, 0, dp(12f))
+            setPadding(dp(4f), 0, 0, dp(18f))
         }
         appSection.addView(appHeading)
 
         grid = GridLayout(this).apply {
-            columnCount = pageSize
+            columnCount = 6
             rowCount = 1
             useDefaultMargins = false
             alignmentMode = GridLayout.ALIGN_BOUNDS
             clipChildren = false
             clipToPadding = false
-            setPadding(dp(4f), dp(8f), dp(4f), dp(12f))
+            setPadding(dp(4f), dp(12f), dp(4f), dp(20f))
         }
         val appScroll = android.widget.HorizontalScrollView(this).apply {
             isHorizontalScrollBarEnabled = false
@@ -290,8 +241,8 @@ class MainActivity : Activity() {
             overScrollMode = View.OVER_SCROLL_NEVER
         }
         appScroll.addView(grid, ViewGroup.LayoutParams(-2, -2))
-        appSection.addView(appScroll, LinearLayout.LayoutParams(-1, dp(174f)))
-        content.addView(appSection)
+        appSection.addView(appScroll, LinearLayout.LayoutParams(-1, dp(260f)))
+        content.addView(appSection, LinearLayout.LayoutParams(-1, 0, 1f))
 
         // Preserve folder data and management functions without showing a folder row.
         foldersContainer = LinearLayout(this).apply {
