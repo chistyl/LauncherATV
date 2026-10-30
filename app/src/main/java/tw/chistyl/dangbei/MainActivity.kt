@@ -991,7 +991,7 @@ class MainActivity : Activity() {
                     }
                 }
                 setOnClickListener {
-                    AlertDialog.Builder(this@MainActivity)
+                    val actionDialog = AlertDialog.Builder(this@MainActivity)
                         .setTitle(appLabel(info))
                         .setItems(arrayOf("開啟 APP", "在資料夾內上移", "在資料夾內下移", "移出資料夾")) { _, action ->
                             val packageName = info.activityInfo.packageName
@@ -1030,7 +1030,24 @@ class MainActivity : Activity() {
                                     } else showMessage("資料夾已清空，APP 已移回桌面")
                                 }
                             }
-                        }.setNegativeButton("取消", null).show()
+                        }.setNegativeButton("取消", null).create()
+                    actionDialog.setOnDismissListener {
+                        // Returning from the app-action list restores focus to
+                        // the same APP's overflow control, unless the folder
+                        // itself is being closed or rebuilt by an action.
+                        if (activeFolderDialog === folderDialog &&
+                            folderDialog.isShowing && !launchingFromFolder
+                        ) {
+                            uiHandler.post {
+                                if (actions.isAttachedToWindow && actions.isFocusable) {
+                                    actions.requestFocus()
+                                } else {
+                                    item.requestFocus()
+                                }
+                            }
+                        }
+                    }
+                    actionDialog.show()
                 }
             }
             item.addView(actions, LinearLayout.LayoutParams(dp(42f), dp(34f)))
