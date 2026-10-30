@@ -576,12 +576,12 @@ class MainActivity : Activity() {
                 gravity = Gravity.CENTER
                 isFocusable = true
                 isFocusableInTouchMode = true
-                background = focusBackground(false)
+                background = getDrawable(R.drawable.bg_app_list_item)
                 setPadding(dp(6f), dp(6f), dp(6f), dp(6f))
                 clipToPadding = false
                 setTag(info.activityInfo.packageName)
                 setOnFocusChangeListener { v, focused ->
-                    v.background = focusBackground(focused)
+                    v.background = getDrawable(if (focused) R.drawable.focus_app_list_item else R.drawable.bg_app_list_item)
                     v.animate().scaleX(if (focused) 1.055f else 1f)
                         .scaleY(if (focused) 1.055f else 1f).setDuration(150).start()
                     v.elevation = if (focused) dp(12f).toFloat() else 0f
