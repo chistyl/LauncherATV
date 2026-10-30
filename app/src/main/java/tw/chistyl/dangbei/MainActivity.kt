@@ -152,11 +152,20 @@ class MainActivity : Activity() {
         }
         root.addView(shade, FrameLayout.LayoutParams(-1, -1))
 
+        // Match the reference desktop's proportional safe area instead of
+        // using fixed margins that drift across 720p/1080p/4K TV panels.
+        val density = resources.displayMetrics.density
+        val screenWidthDp = resources.displayMetrics.widthPixels / density
+        val screenHeightDp = resources.displayMetrics.heightPixels / density
+        val sideInset = (screenWidthDp * 0.055f).coerceIn(42f, 88f)
+        val topInset = (screenHeightDp * 0.045f).coerceIn(28f, 58f)
+        val bottomInset = (screenHeightDp * 0.045f).coerceIn(28f, 58f)
+
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             clipChildren = false
             clipToPadding = false
-            setPadding(dp(58f), dp(34f), dp(58f), dp(42f))
+            setPadding(dp(sideInset), dp(topInset), dp(sideInset), dp(bottomInset))
         }
 
         val header = LinearLayout(this).apply {
@@ -210,6 +219,8 @@ class MainActivity : Activity() {
 
         val appSection = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
+            // Keep the app title and app shelf as one anchored group, centered
+            // in the reference desktop's middle content band.
             gravity = Gravity.CENTER_VERTICAL
             clipChildren = false
             clipToPadding = false
