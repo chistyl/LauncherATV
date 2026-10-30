@@ -1178,14 +1178,21 @@ class MainActivity : Activity() {
                 activeFolderDialog = null
             }
             if (!launchingFromFolder) {
-                val folderTile = (0 until foldersContainer.childCount)
-                    .map { foldersContainer.getChildAt(it) }
-                    .firstOrNull { it.tag == name && it.isFocusable }
-                if (folderTile != null) {
-                    folderTile.requestFocus()
-                } else {
+                // Wait until the dialog window is detached before requesting
+                // focus. Some TV firmware otherwise drops the immediate
+                // requestFocus() issued from onDismiss.
+                uiHandler.post {
+                    val folderTile = (0 until foldersContainer.childCount)
+                        .map { foldersContainer.getChildAt(it) }
+                        .firstOrNull {
+                            it.tag == name && it.isFocusable && it.isAttachedToWindow
+                        }
+                    if (folderTile != null && folderTile.requestFocus()) {
+                        return@post
+                    }
+
                     // The folder may have been emptied or removed while its
-                    // dialog was open. Never leave TV focus on a detached view.
+                    // dialog was open. Restore a valid desktop target instead.
                     val desktop = desktopApps()
                     if (desktop.isNotEmpty()) {
                         val targetIndex = lastFocusedPackage?.let { pkg ->
