@@ -530,13 +530,25 @@ class MainActivity : Activity() {
         }
     }
 
+    /**
+     * Prefer Android TV artwork over a phone launcher icon.
+     * Leanback apps commonly publish a wide banner on the activity or application.
+     */
     private fun appIcon(info: android.content.pm.ResolveInfo): Drawable {
         val pkg = info.activityInfo.packageName
         val cached = appIconCache[pkg]
-        if (cached != null) {
-            return cached.newDrawable(resources).mutate()
+        if (cached != null) return cached.newDrawable(resources).mutate()
+
+        val pm = packageManager
+        val component = android.content.ComponentName(pkg, info.activityInfo.name)
+        val drawable = try {
+            pm.getActivityBanner(component)
+                ?: pm.getApplicationBanner(pkg)
+                ?: info.loadBanner(pm)
+                ?: info.loadIcon(pm)
+        } catch (_: Exception) {
+            info.loadIcon(pm)
         }
-        val drawable = info.loadIcon(packageManager)
         drawable.constantState?.let { appIconCache[pkg] = it }
         return drawable
     }
@@ -548,15 +560,14 @@ class MainActivity : Activity() {
         page = page.coerceIn(0, maxPage)
         val start = page * pageSize
         val visible = desktopList.drop(start).take(pageSize)
-        // Dangbei 4.1.7-inspired launcher icons: large square app artwork in one horizontal shelf.
+        // TV-first app shelf: wide Android TV banners, not enlarged phone icons.
         val density = resources.displayMetrics.density
-        val iconWidthDp = 156f
-        val iconHeightDp = 156f
-        val cardWidthDp = 184f
-        val cardHeightDp = 220f
-        val cardMarginDp = 10f
+        val artworkWidthDp = 232f
+        val artworkHeightDp = 130f
+        val cardWidthDp = 252f
+        val cardHeightDp = 174f
+        val cardMarginDp = 12f
         visible.forEachIndexed { index, info ->
-            val pm = packageManager
             var cardIcon: ImageView? = null
             var cardLabel: TextView? = null
             val item = LinearLayout(this).apply {
@@ -566,22 +577,20 @@ class MainActivity : Activity() {
                 isFocusable = true
                 isFocusableInTouchMode = true
                 background = focusBackground(false)
-                val cardPadding = (4f * density).toInt()
-                setPadding(cardPadding, cardPadding, cardPadding, cardPadding)
+                setPadding(dp(6f), dp(6f), dp(6f), dp(6f))
                 clipToPadding = false
                 setTag(info.activityInfo.packageName)
                 setOnFocusChangeListener { v, focused ->
                     v.background = focusBackground(focused)
-                    v.animate().scaleX(if (focused) 1.07f else 1f)
-                        .scaleY(if (focused) 1.07f else 1f).setDuration(150).start()
-                    v.elevation = if (focused) dp(10f).toFloat() else 0f
-                    // The original launcher emphasizes the selected app icon with a crisp white focus frame.
+                    v.animate().scaleX(if (focused) 1.055f else 1f)
+                        .scaleY(if (focused) 1.055f else 1f).setDuration(150).start()
+                    v.elevation = if (focused) dp(12f).toFloat() else 0f
                     cardIcon?.animate()?.scaleX(if (focused) 1.025f else 1f)
                         ?.scaleY(if (focused) 1.025f else 1f)?.setDuration(150)?.start()
                     cardLabel?.apply {
                         setTypeface(null, if (focused) android.graphics.Typeface.BOLD
                             else android.graphics.Typeface.NORMAL)
-                        setShadowLayer(if (focused) 7f else 4f, 0f, 2f, Color.BLACK)
+                        setTextColor(if (focused) Color.WHITE else 0xFFE1E6ED.toInt())
                     }
                     if (focused) {
                         lastFocusedPackage = info.activityInfo.packageName
@@ -604,14 +613,8 @@ class MainActivity : Activity() {
                 setOnDragListener { target, event ->
                     when (event.action) {
                         android.view.DragEvent.ACTION_DRAG_STARTED -> true
-                        android.view.DragEvent.ACTION_DRAG_ENTERED -> {
-                            target.alpha = 0.65f
-                            true
-                        }
-                        android.view.DragEvent.ACTION_DRAG_EXITED -> {
-                            target.alpha = 1f
-                            true
-                        }
+                        android.view.DragEvent.ACTION_DRAG_ENTERED -> { target.alpha = 0.65f; true }
+                        android.view.DragEvent.ACTION_DRAG_EXITED -> { target.alpha = 1f; true }
                         android.view.DragEvent.ACTION_DROP -> {
                             target.alpha = 1f
                             val fromPackage = event.localState as? String
@@ -628,45 +631,36 @@ class MainActivity : Activity() {
                             }
                             true
                         }
-                        android.view.DragEvent.ACTION_DRAG_ENDED -> {
-                            target.alpha = 1f
-                            true
-                        }
+                        android.view.DragEvent.ACTION_DRAG_ENDED -> { target.alpha = 1f; true }
                         else -> true
                     }
                 }
             }
 
-            val icon = ImageView(this).apply {
+            val artwork = ImageView(this).apply {
                 setImageDrawable(appIcon(info))
                 scaleType = ImageView.ScaleType.FIT_CENTER
                 background = GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
-                    cornerRadius = dp(16f).toFloat()
-                    setColor(0x22FFFFFF)
-                    setStroke(dp(1f), 0x55FFFFFF)
+                    cornerRadius = dp(9f).toFloat()
+                    setColor(0x18000000)
+                    setStroke(dp(1f), 0x33FFFFFF)
                 }
-                val iconPadding = dp(12f)
-                setPadding(iconPadding, iconPadding, iconPadding, iconPadding)
                 contentDescription = appLabel(info)
             }
-            // The extracted original pic_icon_bg asset is a wide 360:224 tile.
-            // Keep the rendered tile close to that source aspect ratio.
-            cardIcon = icon
-            item.addView(icon, LinearLayout.LayoutParams(
-                (iconWidthDp * density).toInt(),
-                (iconHeightDp * density).toInt()
+            cardIcon = artwork
+            item.addView(artwork, LinearLayout.LayoutParams(
+                dp(artworkWidthDp), dp(artworkHeightDp)
             ))
 
             val label = TextView(this).apply {
                 text = appLabel(info)
-                textSize = 15f
+                textSize = 14f
                 gravity = Gravity.CENTER
                 maxLines = 1
                 ellipsize = android.text.TextUtils.TruncateAt.END
-                setTextColor(Color.WHITE)
-                setShadowLayer(4f, 0f, 2f, Color.BLACK)
-                setPadding(0, (7f * density).toInt(), 0, 0)
+                setTextColor(0xFFE1E6ED.toInt())
+                setPadding(dp(4f), dp(5f), dp(4f), 0)
             }
             cardLabel = label
             item.addView(label, LinearLayout.LayoutParams(-1, -2))
