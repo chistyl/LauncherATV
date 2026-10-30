@@ -969,7 +969,8 @@ class MainActivity : Activity() {
                 setPadding(0, dp(8f), 0, 0)
             }
             item.addView(label, LinearLayout.LayoutParams(-1, -2))
-            val actions = TextView(this).apply {
+            val actionButton = TextView(this)
+            val actions = actionButton.apply {
                 text = "⋮"
                 textSize = 20f
                 gravity = Gravity.CENTER
@@ -1039,8 +1040,8 @@ class MainActivity : Activity() {
                             folderDialog.isShowing && !launchingFromFolder
                         ) {
                             uiHandler.post {
-                                if (actions.isAttachedToWindow && actions.isFocusable) {
-                                    actions.requestFocus()
+                                if (actionButton.isAttachedToWindow && actionButton.isFocusable) {
+                                    actionButton.requestFocus()
                                 } else {
                                     item.requestFocus()
                                 }
