@@ -764,6 +764,7 @@ class MainActivity : Activity() {
             return
         }
         foldersContainer.visibility = View.VISIBLE
+        val folderTiles = mutableListOf<View>()
         folderNames.forEach { name ->
             val count = folderCounts[name] ?: 0
             val tile = LinearLayout(this).apply {
@@ -838,9 +839,20 @@ class MainActivity : Activity() {
             textColumn.addView(label)
             textColumn.addView(subLabel)
             tile.addView(textColumn, LinearLayout.LayoutParams(0, -2, 1f))
+            tile.id = View.generateViewId()
+            folderTiles.add(tile)
             foldersContainer.addView(tile, LinearLayout.LayoutParams(dp(150f), dp(58f)).apply {
                 marginEnd = dp(12f)
             })
+        }
+        // Explicit left/right focus links keep folder navigation predictable
+        // on TV remotes, including when the row is horizontally scrollable.
+        folderTiles.indices.forEach { index ->
+            val tile = folderTiles[index]
+            tile.nextFocusLeftId = if (index > 0) folderTiles[index - 1].id else tile.id
+            tile.nextFocusRightId = if (index < folderTiles.lastIndex) {
+                folderTiles[index + 1].id
+            } else tile.id
         }
     }
 
