@@ -550,18 +550,13 @@ class MainActivity : Activity() {
         page = page.coerceIn(0, maxPage)
         val start = page * pageSize
         val visible = desktopList.drop(start).take(pageSize)
-        // Adapt card and icon dimensions to the TV's logical screen width.
-        // The source icon background is 360:224, so preserve that ratio.
+        // Emotn-style shortcut tiles: one horizontal row of wide app banners.
         val density = resources.displayMetrics.density
-        val screenWidthDp = resources.displayMetrics.widthPixels / density
-        val columnWidthDp = ((screenWidthDp - 108f) / 6f).coerceAtLeast(120f)
-        // Dangbei's supplied app tile artwork is landscape (360:224).
-        // Size the card from the actual icon height plus vertical padding and
-        // the one-line app label, so 1080p/720p layouts do not crop the label.
-        val iconWidthDp = (columnWidthDp * 0.82f).coerceIn(104f, 160f)
-        val iconHeightDp = iconWidthDp * 224f / 360f
-        val cardHeightDp = (iconHeightDp + 52f).coerceIn(116f, 176f)
-        val cardMarginDp = (columnWidthDp * 0.025f).coerceIn(4f, 9f)
+        val iconWidthDp = 168f
+        val iconHeightDp = 96f
+        val cardWidthDp = 184f
+        val cardHeightDp = 148f
+        val cardMarginDp = 8f
         visible.forEachIndexed { index, info ->
             val pm = packageManager
             var cardIcon: ImageView? = null
@@ -572,19 +567,16 @@ class MainActivity : Activity() {
                 gravity = Gravity.CENTER
                 isFocusable = true
                 isFocusableInTouchMode = true
-                background = getDrawable(R.drawable.bg_app_list_item)
-                val cardPadding = (10f * density).toInt()
+                background = focusBackground(false)
+                val cardPadding = (4f * density).toInt()
                 setPadding(cardPadding, cardPadding, cardPadding, cardPadding)
                 clipToPadding = false
                 setTag(info.activityInfo.packageName)
                 setOnFocusChangeListener { v, focused ->
-                    v.background = getDrawable(
-                        if (focused) R.drawable.focus_app_list_item
-                        else R.drawable.bg_app_list_item
-                    )
-                    v.animate().scaleX(if (focused) 1.055f else 1f)
-                        .scaleY(if (focused) 1.055f else 1f).setDuration(150).start()
-                    v.elevation = if (focused) 12f else 0f
+                    v.background = focusBackground(focused)
+                    v.animate().scaleX(if (focused) 1.07f else 1f)
+                        .scaleY(if (focused) 1.07f else 1f).setDuration(150).start()
+                    v.elevation = if (focused) dp(10f).toFloat() else 0f
                     // Keep the selected app unmistakable on a TV from sofa distance.
                     cardIcon?.animate()?.scaleX(if (focused) 1.035f else 1f)
                         ?.scaleY(if (focused) 1.035f else 1f)?.setDuration(150)?.start()
@@ -650,8 +642,11 @@ class MainActivity : Activity() {
             val icon = ImageView(this).apply {
                 setImageDrawable(appIcon(info))
                 scaleType = ImageView.ScaleType.FIT_CENTER
-                background = getDrawable(R.drawable.pic_icon_bg)
-                val iconPadding = (12f * density).toInt()
+                background = GradientDrawable().apply {
+                    cornerRadius = dp(12f).toFloat()
+                    setColor(0xD9000000.toInt())
+                }
+                val iconPadding = dp(10f)
                 setPadding(iconPadding, iconPadding, iconPadding, iconPadding)
                 contentDescription = appLabel(info)
             }
@@ -677,30 +672,29 @@ class MainActivity : Activity() {
             item.addView(label, LinearLayout.LayoutParams(-1, -2))
 
             val lp = GridLayout.LayoutParams().apply {
-                width = 0
-                height = (cardHeightDp * density).toInt()
-                columnSpec = GridLayout.spec(index % 6, 1f)
-                rowSpec = GridLayout.spec(index / 6)
-                val margin = (cardMarginDp * density).toInt()
+                width = dp(cardWidthDp)
+                height = dp(cardHeightDp)
+                columnSpec = GridLayout.spec(index)
+                rowSpec = GridLayout.spec(0)
+                width = dp(cardWidthDp)
+                val margin = dp(cardMarginDp)
                 setMargins(margin, margin, margin, margin)
             }
             grid.addView(item, lp)
         }
 
-        // Use explicit in-page focus links so scaling animations never make
-        // Android TV's spatial focus search choose an unexpected neighbour.
+        // Explicit horizontal focus map matches Emotn's single app shortcut row.
         for (index in 0 until grid.childCount) {
-            val column = index % 6
-            val row = index / 6
             val item = grid.getChildAt(index)
-            if (column > 0) item.nextFocusLeftId = grid.getChildAt(index - 1).id
-            if (column < 5 && index + 1 < grid.childCount) {
-                item.nextFocusRightId = grid.getChildAt(index + 1).id
-            }
-            val above = index - 6
-            val below = index + 6
-            if (row > 0 && above >= 0) item.nextFocusUpId = grid.getChildAt(above).id
-            if (below < grid.childCount) item.nextFocusDownId = grid.getChildAt(below).id
+            if (index > 0) item.nextFocusLeftId = grid.getChildAt(index - 1).id
+            if (index + 1 < grid.childCount) item.nextFocusRightId = grid.getChildAt(index + 1).id
+            item.nextFocusUpId = if (index == 0 && ::desktopSettingsButton.isInitialized) {
+                desktopSettingsButton.id
+            } else item.id
+            item.nextFocusDownId = item.id
+        }
+        if (grid.childCount > 0 && ::desktopSettingsButton.isInitialized) {
+            desktopSettingsButton.nextFocusDownId = grid.getChildAt(0).id
         }
 
         val pages = ((desktopList.size - 1).coerceAtLeast(0)) / pageSize + 1
