@@ -237,7 +237,7 @@ class MainActivity : Activity() {
         grid = GridLayout(this).apply {
             // 固定五欄，APP 依序向下排列。
             columnCount = 5
-            rowCount = 0
+            rowCount = GridLayout.UNDEFINED
             useDefaultMargins = false
             alignmentMode = GridLayout.ALIGN_BOUNDS
             clipChildren = false
@@ -1691,7 +1691,7 @@ class MainActivity : Activity() {
     private fun focusLastAppInColumn(column: Int): Boolean {
         if (grid.childCount == 0) return false
         val candidates = (0 until grid.childCount)
-            .filter { it % 6 == column.coerceIn(0, 5) }
+            .filter { it % 5 == column.coerceIn(0, 4) }
         val target = candidates.lastOrNull() ?: grid.childCount - 1
         return grid.getChildAt(target).requestFocus()
     }
