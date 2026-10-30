@@ -960,7 +960,12 @@ class MainActivity : Activity() {
                 isFocusable = true
                 isFocusableInTouchMode = true
                 contentDescription = "更多操作"
-                setOnFocusChangeListener { _, focused ->
+                background = focusBackground(false)
+                setOnFocusChangeListener { v, focused ->
+                    v.background = focusBackground(focused)
+                    v.animate().scaleX(if (focused) 1.08f else 1f)
+                        .scaleY(if (focused) 1.08f else 1f).setDuration(110).start()
+                    v.elevation = if (focused) dp(8f).toFloat() else 0f
                     if (focused) {
                         lastFocusedFolderName = name
                         prefs.edit().putString(
