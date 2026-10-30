@@ -276,7 +276,7 @@ class MainActivity : Activity() {
             @Suppress("DEPRECATION")
             if (manager.activeNetworkInfo?.isConnected == true) "網路已連線" else "網路未連線"
         }
-        networkLabel.text = "●  $label"
+        networkLabel.text = label
     }
 
     private fun folderMap(): MutableMap<String, String> {
@@ -1397,13 +1397,14 @@ class MainActivity : Activity() {
     private fun focusBackground(focused: Boolean): GradientDrawable =
         GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
-            cornerRadius = 16f
+            cornerRadius = dp(13f).toFloat()
             if (focused) {
-                setColor(0x553B8CFF)
-                setStroke(4, blue)
+                // Cleaner TV focus treatment: thinner blue outline and lighter glass fill.
+                setColor(0x333B8CFF)
+                setStroke(dp(2f), blue)
             } else {
-                setColor(0x33202B3D)
-                setStroke(1, 0x55FFFFFF)
+                setColor(0x22202B3D)
+                setStroke(dp(1f), 0x44FFFFFF)
             }
         }
 
