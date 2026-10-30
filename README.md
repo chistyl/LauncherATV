@@ -1,4 +1,4 @@
-# 當貝桌面重建版 V5.4.0
+
 
 ## 本版更新：移出資料夾後保留鄰近 APP 焦點
 - 修正 GitHub Actions APK 建置時的重複桌布資源：保留 `bg_launcher_default.webp`，移除同名 JPG，避免 Android 資源合併失敗。
