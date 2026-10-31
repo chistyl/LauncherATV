@@ -1,9 +1,9 @@
-name: Build Android TV APK
+name: Build CleanYourTV V12 APK
 
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ cleanyourtv-v12 ]
 
 permissions:
   contents: read
@@ -12,37 +12,42 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
+      - name: Checkout upload branch
         uses: actions/checkout@v4
 
+      - name: Reassemble V12 source archive
+        run: |
+          set -euo pipefail
+          test -f CleanYourTV-V12-source.zip.part01
+          test -f CleanYourTV-V12-source.zip.part02
+          cat CleanYourTV-V12-source.zip.part01 CleanYourTV-V12-source.zip.part02 > /tmp/CleanYourTV-V12-source.zip
+          unzip -tq /tmp/CleanYourTV-V12-source.zip
+          mkdir -p /tmp/v12-source
+          unzip -q /tmp/CleanYourTV-V12-source.zip -d /tmp/v12-source
+          test -f /tmp/v12-source/cleanyourtv-main/launcher/settings.gradle
+
       - name: Set up JDK 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: Install Android SDK packages
-        run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)"
-          if [ -z "$SDKMANAGER" ]; then
-            echo "::error::sdkmanager not found under $ANDROID_HOME/cmdline-tools"
-            exit 1
-          fi
-          "$SDKMANAGER" --install "platforms;android-35" "build-tools;35.0.0" "platform-tools"
+        run: sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
 
-      - name: Build APK
-        run: gradle --no-daemon assembleDebug
+      - name: Build CleanYourTV V12 debug APK
+        working-directory: /tmp/v12-source/cleanyourtv-main/launcher
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DangbeiLauncher-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: CleanYourTV-V12-debug
+          path: /tmp/v12-source/cleanyourtv-main/launcher/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 30
