@@ -1,0 +1,58 @@
+name: Build CleanYourTV V12 APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ cleanyourtv-v12 ]
+    paths:
+      - 'CleanYourTV-V12-source.zip.part*'
+      - '.github/workflows/build-v12.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout V12 source parts
+        uses: actions/checkout@v4
+
+      - name: Verify and merge ZIP parts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f CleanYourTV-V12-source.zip.part01
+          test -f CleanYourTV-V12-source.zip.part02
+          cat CleanYourTV-V12-source.zip.part* > CleanYourTV-V12-source.zip
+          unzip -t CleanYourTV-V12-source.zip
+          mkdir source
+          unzip -q CleanYourTV-V12-source.zip -d source
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Install Android SDK 34
+        run: |
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)"
+          "$SDKMANAGER" --install "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+
+      - name: Build CleanYourTV V12 APK
+        working-directory: source/cleanyourtv-main/launcher
+        run: gradle --no-daemon assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CleanYourTV-V12-debug
+          path: source/cleanyourtv-main/launcher/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
